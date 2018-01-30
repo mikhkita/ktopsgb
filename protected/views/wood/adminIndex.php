@@ -25,12 +25,13 @@
 		<? if($_GET["payment_id"] != 1): ?>
 			<th><?=$labels['provider_id']?></th>
 		<? endif; ?>
+		<th><?=$labels['species_id']?></th>
 		<th><?=$labels['cubage']?></th>
 		<th><?=$labels['price']?></th>
 		<th><?=$labels['sum']?></th>
 		<th><?=$labels['car']?></th>
 		<? if($_GET["payment_id"] == 1): ?>
-			<th><?=$labels['who']?></th>
+			<th><?=$labels['group_id']?></th>
 		<? else: ?>
 			<th><?=$labels['paid']?></th>
 		<? endif; ?>
@@ -40,14 +41,15 @@
 	<tr class="b-filter">
 		<td><?php echo CHtml::activeTextField($filter, 'date_from', array('tabindex' => 0, "placeholder" => "От", "class" => "date")); ?><span class="filter-separator">-</span><?php echo CHtml::activeTextField($filter, 'date_to', array('tabindex' => 0, "placeholder" => "До", "class" => "date")); ?></td>
 		<? if($_GET["payment_id"] != 1): ?>
-			<td><?php echo CHtml::activeDropDownList($filter, 'provider_id', CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "tabindex" => 1, "placeholder" => "Поиск поставщику")); ?></td>
+			<td><?php echo CHtml::activeDropDownList($filter, 'provider_id', CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все поставщики", "tabindex" => 1, "placeholder" => "Поиск по поставщику")); ?></td>
 		<? endif; ?>
+		<td><?php echo CHtml::activeDropDownList($filter, 'species_id', CHtml::listData(Species::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Любая порода", "tabindex" => 1, "placeholder" => "Поиск по породе")); ?></td>
 		<td></td>
 		<td></td>
 		<td></td>
 		<td><?php echo CHtml::activeTextField($filter, 'car', array('tabindex' => 2, "placeholder" => "Поиск по авто")); ?></td>
 		<? if($_GET["payment_id"] == 1): ?>
-			<td><?php echo CHtml::activeTextField($filter, 'who', array('tabindex' => 3, "placeholder" => "Поиск по принявшему")); ?></td>
+			<td><?php echo CHtml::activeDropDownList($filter, 'group_id', CHtml::listData(WoodGroup::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все группы", "tabindex" => 1, "placeholder" => "Поиск по группе")); ?></td>
 		<? else: ?>
 			<td><?php echo CHtml::activeDropDownList($filter, 'paid', array( "" => "Не важно", 0 => "Нет", 1 => "Да"), array("class" => "select2", 'tabindex' => 3)); ?></td>
 		<? endif; ?>
@@ -62,12 +64,13 @@
 				<? if($_GET["payment_id"] != 1): ?>
 					<td><?=$item->provider->name?></td>
 				<? endif; ?>
+				<td class="tr"><?=$item->species->name?></td>
 				<td class="tr"><?=$item->cubage?></td>
 				<td class="tr"><?=number_format( $item->price, 0, ',', '&nbsp;' )?></td>
-				<td class="tr"><?=number_format( $item->price*$item->cubage, 0, ',', '&nbsp;' )?></td>
+				<td class="tr"><?=number_format( $item->sum, 0, ',', '&nbsp;' )?></td>
 				<td><?=$item->car?></td>
 				<? if($_GET["payment_id"] == 1): ?>
-					<td><?=$item->who?></td>
+					<td><?=$item->group->name?></td>
 				<? else: ?>
 					<td><?=(($item->paid)?"Да":"Нет")?></td>
 				<? endif; ?>

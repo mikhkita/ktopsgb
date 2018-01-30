@@ -1,20 +1,20 @@
 <?php
 
 /**
- * This is the model class for table "saw_worker".
+ * This is the model class for table "saw_china".
  *
- * The followings are the available columns in table "saw_worker":
- * @property integer $worker_id
+ * The followings are the available columns in table "saw_china":
+ * @property integer $china_id
  * @property string $saw_id
  */
-class SawWorker extends CActiveRecord
+class SawChina extends CActiveRecord
 {
 	/**
 	 * @return string the associated database table name
 	 */
 	public function tableName()
 	{
-		return "saw_worker";
+		return "saw_china";
 	}
 
 	/**
@@ -25,12 +25,12 @@ class SawWorker extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("worker_id, saw_id", "required"),
-			array("worker_id", "numerical", "integerOnly" => true),
+			array("china_id, saw_id", "required"),
+			array("china_id", "numerical", "integerOnly" => true),
 			array("saw_id", "length", "max" => 10),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("worker_id, saw_id", "safe", "on" => "search"),
+			array("china_id, saw_id", "safe", "on" => "search"),
 		);
 	}
 
@@ -43,7 +43,7 @@ class SawWorker extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			"saw" => array(self::BELONGS_TO, "Saw", "saw_id"),
-			"worker" => array(self::BELONGS_TO, "Worker", "worker_id"),
+			"china" => array(self::BELONGS_TO, "China", "china_id"),
 		);
 	}
 
@@ -53,7 +53,7 @@ class SawWorker extends CActiveRecord
 	public function attributeLabels()
 	{
 		return array(
-			"worker_id" => "Рабочий",
+			"china_id" => "Рабочий",
 			"saw_id" => "Рабочий день",
 		);
 	}
@@ -76,15 +76,15 @@ class SawWorker extends CActiveRecord
 
 		$criteria=new CDbCriteria;
 
-		$criteria->compare("worker_id", $this->worker_id);
+		$criteria->compare("china_id", $this->china_id);
 		$criteria->addSearchCondition("saw_id", $this->saw_id);
 
 		if( $count ){
-			return SawWorker::model()->count($criteria);
+			return SawChina::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
 				"criteria" => $criteria,
-				"pagination" => array("pageSize" => $pages, "route" => "sawWorker/adminindex")
+				"pagination" => array("pageSize" => $pages, "route" => "sawChina/adminindex")
 			));
 		}
 	}
@@ -108,7 +108,7 @@ class SawWorker extends CActiveRecord
 	 * Returns the static model of the specified AR class.
 	 * Please note that you should have this exact method in all your CActiveRecord descendants!
 	 * @param string $className active record class name.
-	 * @return SawWorker the static model class
+	 * @return SawChina the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{

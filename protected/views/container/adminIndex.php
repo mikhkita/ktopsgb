@@ -22,7 +22,7 @@
 		<th><?=$labels["loading_date"]?></th>
 		<th><?=$labels["issue_date"]?></th>
 		<th><?=$labels["location"]?></th>
-		<th style="width: 120px;">Действия</th>
+		<th style="width: 150px;">Действия</th>
 	</tr>
 	<tr class="b-filter">
 		<td><?php echo CHtml::activeDropDownList($filter, "exporter_group_id", CHtml::listData(ExporterGroup::model()->with("branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name"), array("class" => "select2", "empty" => "Все группы", "tabindex" => 1)); ?></td>
@@ -52,6 +52,7 @@
 					<? endif; ?>
 					<? if( Yii::app()->user->checkAccess("updateContainer") ): ?>
 						<a href="<?php echo Yii::app()->createUrl("/".$this->adminMenu["cur"]->code."/adminupdate",array("id"=>$item->id, "branch_id" => $_GET["branch_id"]))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>
+						<a href="<?php echo Yii::app()->createUrl("/".$this->adminMenu["cur"]->code."/admincargoindex",array("container_id"=>$item->id))?>" class="b-tool b-tool-box" title="Груз"></a>
 						<a href="<?=Yii::app()->createUrl("/".$this->adminMenu["cur"]->code."/admindelete",array("id"=>$item->id))?>" class="ajax-form ajax-delete b-tool b-tool-delete" title="Удалить <?=$this->adminMenu["cur"]->vin_name?>"></a>
 					<? endif; ?>
 				</td>

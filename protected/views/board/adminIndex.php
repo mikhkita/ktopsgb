@@ -21,9 +21,9 @@
 <table class="b-table" border="1">
 	<tr>
 		<th style="width: 210px; min-width: 210px;"><?=$labels['date']?></th>
+		<th><?=$itemLabels['length']?></th>
 		<th><?=$itemLabels['thickness']?></th>
 		<th><?=$itemLabels['width']?></th>
-		<th><?=$itemLabels['length']?></th>
 		<th><?=$itemLabels['count']?></th>
 		<th><?=$itemLabels['cubage']?></th>
 		<? if( $curPlant->is_price ): ?>
@@ -70,9 +70,9 @@
 					<td></td>
 				<? endif; ?>
 				<? if( $curPlant->is_price ): ?>
-					<td rowspan="<?=count($board->items)?>" class="tc"><?=number_format( round($board->getSum(), 2), 0, '.', '&nbsp;' )?></td>
+					<td rowspan="<?=count($board->items)?>" class="tc"><?=number_format( floor($board->getSum()*100)/100, 2, '.', '&nbsp;' )?></td>
 				<? endif; ?>
-				<td rowspan="<?=count($board->items)?>" class="tc"><?=number_format( round($board->getCubageSum(), 2), 0, '.', '&nbsp;' )?></td>
+				<td rowspan="<?=count($board->items)?>" class="tc"><?=number_format( floor($board->getCubageSum()*100)/100, 2, '.', '&nbsp;' )?></td>
 				<td rowspan="<?=count($board->items)?>">
 					<? if( Yii::app()->user->checkAccess('updateBoard') ): ?>
 						<a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$board->id, 'plant_id' => $_GET["plant_id"]))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>
@@ -89,7 +89,7 @@
 			<? endif; ?>
 		<? endforeach; ?>
 	<? else: ?>
-		<tr><td colspan=10>Записей не найдено</td></tr>
+		<tr><td colspan=12>Записей не найдено</td></tr>
 	<? endif; ?>
 </table>
 <?php $this->endWidget(); ?>

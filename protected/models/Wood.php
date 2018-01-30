@@ -35,15 +35,15 @@ class Wood extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("date, payment_id, cubage, price, car", "required"),
-			array("payment_id, paid", "numerical", "integerOnly" => true),
+			array("date, payment_id, group_id, cubage, price, car, sum, species_id", "required"),
+			array("payment_id, group_id, paid, species_id", "numerical", "integerOnly" => true),
 			array("provider_id, car", "length", "max" => 10),
-			array("cubage, price", "numerical"),
+			array("cubage, price, sum", "numerical"),
 			array("who", "length", "max" => 128),
 			array("comment", "length", "max" => 256),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, date, payment_id, provider_id, cubage, price, car, who, paid", "safe", "on" => "search"),
+			array("id, date, payment_id, provider_id, group_id, sum, species_id, cubage, price, car, who, paid", "safe", "on" => "search"),
 		);
 	}
 
@@ -56,7 +56,9 @@ class Wood extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			"payment" => array(self::BELONGS_TO, "Payment", "payment_id"),
+			"species" => array(self::BELONGS_TO, "Species", "species_id"),
 			"provider" => array(self::BELONGS_TO, "WoodProvider", "provider_id"),
+			"group" => array(self::BELONGS_TO, "WoodGroup", "group_id"),
 		);
 	}
 
@@ -69,6 +71,7 @@ class Wood extends CActiveRecord
 			"id" => "ID",
 			"date" => "Дата",
 			"payment_id" => "Тип",
+			"species_id" => "Порода",
 			"provider_id" => "Поставщик",
 			"cubage" => "Кубатура",
 			"price" => "Цена",
@@ -77,6 +80,7 @@ class Wood extends CActiveRecord
 			"who" => "Кто принял",
 			"paid" => "Оплачено",
 			"comment" => "Комментарий",
+			"group_id" => "Группа"
 		);
 	}
 
@@ -92,12 +96,21 @@ class Wood extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false, $returnCriteria = false)
+	public function search($pages, $count = false, $returnCriteria = false, $with = false, $distinct = false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
 		$criteria->order = "date DESC";
+
+		if( $with ){
+			$criteria->with = $with;
+		}
+
+		if( $distinct ){
+			$criteria->distinct = true;
+			$criteria->select = $distinct;
+		}
 
 		if( $this->date_from != NULL && $this->date_from != "__.__.____" ){
 			$criteria->addCondition("date >= '".date("Y-m-d H:i:s", strtotime($this->date_from))."'");
@@ -108,6 +121,8 @@ class Wood extends CActiveRecord
 
 		$criteria->compare("provider_id", $this->provider_id, true);
 		$criteria->compare("payment_id", $this->payment_id, true);
+		$criteria->compare("group_id", $this->group_id, true);
+		$criteria->compare("species_id", $this->species_id, true);
 
 		// $criteria->compare("date",$this->date,true);
 		$criteria->addSearchCondition("car", $this->car);
@@ -150,7 +165,7 @@ class Wood extends CActiveRecord
 		$sum = 0;
 		foreach ($arWood as $i => $wood) {
 			$cubage += $wood->cubage;
-			$sum += ($wood->cubage*$wood->price);
+			$sum += $wood->sum;
 		}
 
 		return (object) array(

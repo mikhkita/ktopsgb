@@ -83,12 +83,17 @@ class Cash extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false, $returnCriteria = false)
+	public function search($pages, $count = false, $returnCriteria = false, $distinct = false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->order = "date DESC";
+		$criteria->order = "date DESC, id DESC";
+
+		if( $distinct ){
+			$criteria->distinct = true;
+			$criteria->select = $distinct;
+		}
 
 		if( $this->date_from != NULL && $this->date_from != "__.__.____" ){
 			$criteria->addCondition("date >= '".date("Y-m-d H:i:s", strtotime($this->date_from))."'");
@@ -98,8 +103,8 @@ class Cash extends CActiveRecord
 		}
 
         $criteria->compare("type_id", $this->type_id);
-		$criteria->addSearchCondition('reason', $this->reason);
-		$criteria->addSearchCondition('comment', $this->comment);
+		$criteria->addSearchCondition("reason", $this->reason);
+		$criteria->addSearchCondition("comment", $this->comment);
 
 		if( $returnCriteria ){
 			return $criteria;
@@ -107,8 +112,8 @@ class Cash extends CActiveRecord
 			return Cash::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
-				'criteria'=>$criteria,
-				"pagination" => array('pageSize' => $pages, 'route' => 'cash/adminindex')
+				"criteria"=>$criteria,
+				"pagination" => array("pageSize" => $pages, "route" => "cash/adminindex")
 			));
 		}
 	}

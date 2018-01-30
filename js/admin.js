@@ -65,6 +65,7 @@ $(document).ready(function(){
             bindAutocomplete();
             bindTooltip();
             bindNewInputs();
+            bindBoardForm();
             if( $form.attr("data-beforeShow") && customHandlers[$form.attr("data-beforeShow")] ){
                 customHandlers[$form.attr("data-beforeShow")]($form);
             }
@@ -228,6 +229,8 @@ $(document).ready(function(){
             });
         }
 
+        bindAutoSum();
+
         $(".numeric").numericInput({ allowFloat: false, allowNegative: true });
         $(".float").numericInput({ allowFloat: true, allowNegative: true });
         
@@ -310,6 +313,41 @@ $(document).ready(function(){
         });
     }
 
+    function bindAutoSum(){
+        if( $(".b-auto-sum").length && $(".b-auto-price").length && $(".b-auto-cubage").length ){
+            $(".b-auto-price, .b-auto-cubage").change(function(){
+                $(".b-auto-sum").val( $(".b-auto-price").val()*$(".b-auto-cubage").val() );
+            });
+        }
+    }
+
+    function bindBoardForm(){
+        if( $(".b-board-sum").length ){
+            $(".b-popup-form .b-for-new-inputs input:not(.binded)").change(updateBoardForm).addClass("binded");
+
+            updateBoardForm();
+        }
+    }
+
+    function updateBoardForm(){
+        var sum = 0;
+        $(".b-for-new-inputs").children().filter(function() {
+            return $(this).find("input, select, textarea").filter(function(){
+                return $(this).val() != "";
+            }).length;
+        }).each(function(){
+            var row = 1;
+            $(this).find("input, select, textarea").each(function(){
+                row *= ($(this).val()*1);
+                console.log($(this).val());
+            });
+
+            sum += row;
+        });
+
+        $(".b-board-sum b").html(Math.floor(sum*100)/100);
+    }
+
     function bindDate($form){
         if( $form.find(".date").length ){
             $form.find(".date").each(function(){
@@ -351,6 +389,8 @@ $(document).ready(function(){
         }
         $(".b-for-new-inputs .numeric").numericInput({ allowFloat: false, allowNegative: true }).removeClass("numeric");
         $(".b-for-new-inputs .float").numericInput({ allowFloat: true, allowNegative: true }).removeClass("float");
+
+        bindBoardForm();
     }
 
     function removeNewInputs(){
@@ -528,6 +568,48 @@ $(document).ready(function(){
             //             $clone.autocomplete('search');
             //         }
             //     });
+            });
+        }
+    }
+
+    if( $(".b-kit-switcher").length ){
+        $("body").on("click",".b-kit-switcher",function(){
+            toggleMode(!$(this).hasClass("checked"),$(this));
+            return false;
+        });
+        function toggleMode(tog,el){
+            if( tog ){
+                el.addClass("checked");
+                // $(".b-kit-off").removeClass("b-kit-off").addClass("b-kit-on");
+                if( el.attr("data-on") ) customHandlers[el.attr("data-on")](el);
+            }else{
+                el.removeClass("checked");
+                // $(".b-kit-on").removeClass("b-kit-on").addClass("b-kit-off");
+                if( el.attr("data-off") ) customHandlers[el.attr("data-off")](el);
+            }
+        }
+
+        customHandlers["updateDryer"] = function($this){
+            progress.setColor("#D26A44");
+            progress.start(3);
+            var href = $this.attr("data-"+(($this.hasClass("checked"))?"on":"off")+"-href");
+            $.ajax({
+                url: href,
+                success: function(msg){
+                    if( msg != 0 && msg != "0" ){
+                        if( msg == "Работает" ){
+                            $this.parents("tr").find(".on").addClass("green");
+                        }else{
+                            $this.parents("tr").find(".on").removeClass("green");
+                        }
+                        $this.parents("tr").find(".on").text(msg);
+                    }else{
+                        alert("Не удалось переключить состояние сушилки");
+                    }
+                    progress.end(function(){
+                        // $(".b-place-state span[data-id='"+$this.attr("data-id")+"']").removeClass((($this.hasClass("checked"))?"b-yellow":"b-green")).addClass((($this.hasClass("checked"))?"b-green":"b-yellow")); 
+                    });
+                }
             });
         }
     }

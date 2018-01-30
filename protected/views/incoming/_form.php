@@ -20,6 +20,8 @@
 		</div>
 	</div>
 
+	<input type="hidden" name="Incoming[place_id]" value="<?=$model->place_id?>">
+
 	<div class="row clearfix">
 		<?php echo $form->labelEx($model, "cargo"); ?>
 		<?php echo $form->textField($model, "cargo", array("maxlength" => 64, "required" => true, "class" => "autocomplete", "data-values" => Incoming::getDistinct("cargo") )); ?>

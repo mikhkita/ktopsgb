@@ -1,5 +1,12 @@
 <?php
 return array (
+  'readStats' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр статистики',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'readUser' => 
   array (
     'type' => 0,
@@ -70,13 +77,6 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
-  'widgetCash' => 
-  array (
-    'type' => 0,
-    'description' => 'Виджет',
-    'bizRule' => NULL,
-    'data' => NULL,
-  ),
   'readSaw' => 
   array (
     'type' => 0,
@@ -88,6 +88,48 @@ return array (
   array (
     'type' => 0,
     'description' => 'Создание/изменение/удаление пилорам',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readChina' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела рабочих китайцев',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateChina' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление рабочих китайцев',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readWorker' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела рабочих',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateWorker' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление рабочих',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readReloc' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела перекладок',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateReloc' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление перекладок',
     'bizRule' => NULL,
     'data' => NULL,
   ),
@@ -146,6 +188,17 @@ return array (
     'description' => 'Создание/изменение/удаление раздела доски Чин',
     'bizRule' => NULL,
     'data' => NULL,
+  ),
+  'widgetStats' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readStats',
+    ),
   ),
   'userAdmin' => 
   array (
@@ -295,6 +348,14 @@ return array (
       0 => 'readBoard',
       1 => 'updateBoard',
     ),
+    'assignments' => 
+    array (
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
   ),
   'sawManager' => 
   array (
@@ -307,6 +368,50 @@ return array (
       0 => 'readSaw',
       1 => 'updateSaw',
     ),
+    'assignments' => 
+    array (
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
+  'chinaManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readChina',
+      1 => 'updateChina',
+    ),
+  ),
+  'workerManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readWorker',
+      1 => 'updateWorker',
+    ),
+  ),
+  'relocManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readReloc',
+      1 => 'updateReloc',
+    ),
   ),
   'director' => 
   array (
@@ -317,13 +422,17 @@ return array (
     'children' => 
     array (
       0 => 'containerManager',
-      1 => 'readDryer',
+      1 => 'dryerManager',
       2 => 'cashManager',
-      3 => 'readWood',
-      4 => 'readBoard',
-      5 => 'readIncoming',
-      6 => 'readParabel',
-      7 => 'readSaw',
+      3 => 'woodManager',
+      4 => 'boardManager',
+      5 => 'incomingManager',
+      6 => 'parabelManager',
+      7 => 'chinaManager',
+      8 => 'sawManager',
+      9 => 'workerManager',
+      10 => 'relocManager',
+      11 => 'widgetStats',
     ),
     'assignments' => 
     array (
@@ -343,13 +452,7 @@ return array (
     'children' => 
     array (
       0 => 'userAdmin',
-      1 => 'dryerAdmin',
-      2 => 'woodManager',
-      3 => 'parabelManager',
-      4 => 'incomingManager',
-      5 => 'boardManager',
-      6 => 'sawManager',
-      7 => 'director',
+      1 => 'director',
     ),
     'assignments' => 
     array (

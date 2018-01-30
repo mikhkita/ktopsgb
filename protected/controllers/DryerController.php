@@ -21,7 +21,7 @@ class DryerController extends Controller
 				"roles" => array("updateDryer"),
 			),
 			array("allow",
-				"actions" => array("adminQueueUpdate", "adminQueueDelete", "adminQueueCreate", "adminQueueComplete"),
+				"actions" => array("adminQueueUpdate", "adminQueueDelete", "adminQueueCreate", "adminQueueComplete", "adminOn", "adminOff"),
 				"roles" => array("updateDryerQueue"),
 			),
 			array("deny",
@@ -85,6 +85,30 @@ class DryerController extends Controller
 		}
 	}
 
+	public function actionAdminOn($id)
+	{
+		$model = $this->loadModel($id);
+
+		$model->switch = 1;
+		if( $model->save() ){
+			echo "Работает";
+		}else{
+			echo "0";
+		}
+	}
+
+	public function actionAdminOff($id)
+	{
+		$model = $this->loadModel($id);
+
+		$model->switch = 0;
+		if( $model->save() ){
+			echo "Выключена";
+		}else{
+			echo "0";
+		}
+	}
+
 	public function actionAdminDelete($id)
 	{
 		$this->loadModel($id)->delete();
@@ -95,7 +119,7 @@ class DryerController extends Controller
 	public function actionAdminDetail($dryerID, $partial = false)
 	{
 		$dryer = Dryer::model()->findByPk($dryerID);
-		$model = DryerQueue::model()->findAll(array("condition" => "dryer_id='$dryerID'", "order" => "id DESC"));
+		$model = DryerQueue::model()->findAll(array("condition" => "dryer_id='$dryerID'", "order" => "start_date DESC, id DESC"));
 
 		if( !$partial ){
 			$this->layout = "admin";

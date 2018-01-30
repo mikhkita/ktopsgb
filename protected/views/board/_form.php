@@ -24,13 +24,13 @@
 	<? $cols = ($plant->is_price)?"five":"fourth"; ?>
 	<div class="clearfix" style="text-align: left;">
 		<div class="row-<?=$cols?>">
+			<label>Длина <span class="required">*</span></label>
+		</div>
+		<div class="row-<?=$cols?>">
 			<label>Толщина <span class="required">*</span></label>
 		</div>
 		<div class="row-<?=$cols?>">
 			<label>Ширина <span class="required">*</span></label>
-		</div>
-		<div class="row-<?=$cols?>">
-			<label>Длина <span class="required">*</span></label>
 		</div>
 		<div class="row-<?=$cols?>">
 			<label>Количество <span class="required">*</span></label>
@@ -46,13 +46,13 @@
 			<? foreach ($model->items as $i => $item): ?>
 				<div class="row clearfix" data-id="<?=$i?>">
 					<div class="row-<?=$cols?>">
+						<input type="text" name="Items[<?=$i?>][length]" id="le-<?=$i?>" value="<?=$item->length?>" maxlength="30" class="float" required>
+					</div>
+					<div class="row-<?=$cols?>">
 						<input type="text" name="Items[<?=$i?>][thickness]" id="th-<?=$i?>" value="<?=$item->thickness?>" maxlength="30" class="float" required>
 					</div>
 					<div class="row-<?=$cols?>">
 						<input type="text" name="Items[<?=$i?>][width]" id="wi-<?=$i?>" value="<?=$item->width?>" maxlength="30" class="float" required>
-					</div>
-					<div class="row-<?=$cols?>">
-						<input type="text" name="Items[<?=$i?>][length]" id="le-<?=$i?>" value="<?=$item->length?>" maxlength="30" class="float" required>
 					</div>
 					<div class="row-<?=$cols?>">
 						<input type="text" name="Items[<?=$i?>][count]" id="co-<?=$i?>" value="<?=$item->count?>" maxlength="30" class="float" required>
@@ -69,7 +69,9 @@
 	<div class="row buttons">
 		<input type="button" class="add-new-inputs" value="Добавить позиции">
 	</div>
-
+	<div class="b-board-sum">
+		Всего кубов: <b>0</b> куб. м.
+	</div>
 	<div class="row buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? "Добавить" : "Сохранить"); ?>
 		<input type="button" onclick="$.fancybox.close(); return false;" value="Отменить">
@@ -80,13 +82,13 @@
 <div id="input-template" style="display: none;">
 	<div class="row clearfix" data-id="#">
 		<div class="row-<?=$cols?>">
+			<input type="text" name="Items[#][length]" id="le-#" maxlength="30" class="float" required>
+		</div>
+		<div class="row-<?=$cols?>">
 			<input type="text" name="Items[#][thickness]" id="th-#" maxlength="30" class="float" required>
 		</div>
 		<div class="row-<?=$cols?>">
 			<input type="text" name="Items[#][width]" id="wi-#" maxlength="30" class="float" required>
-		</div>
-		<div class="row-<?=$cols?>">
-			<input type="text" name="Items[#][length]" id="le-#" maxlength="30" class="float" required>
 		</div>
 		<div class="row-<?=$cols?>">
 			<input type="text" name="Items[#][count]" id="co-#" maxlength="30" class="float" required>

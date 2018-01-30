@@ -17,7 +17,7 @@ class ContainerController extends Controller
 				"roles" => array("readContainer"),
 			),
 			array("allow",
-				"actions" => array("adminUpdate", "adminDelete", "adminCreate", "adminLocationHistory"),
+				"actions" => array("adminUpdate", "adminDelete", "adminCreate", "adminCargoIndex", "adminCargoCreate", "adminCargoUpdate", "adminCargoDelete", "adminLocationHistory"),
 				"roles" => array("updateContainer"),
 			),
 			array("allow",
@@ -157,6 +157,69 @@ class ContainerController extends Controller
 		}else{
 			$this->renderPartial("adminLocationHistory", $params);
 		}
+	}
+
+	public function actionAdminCargoIndex($partial = false, $container_id = NULL){
+		unset($_GET["partial"]);
+		if( !$partial ){
+			$this->layout = "admin";
+			$this->pageTitle = $this->adminMenu["cur"]->name;
+		}
+
+		$container = $this->loadModel($container_id);
+		$model = Cargo::model()->findAll("container_id='$container_id'");
+
+		$params = array(
+			"data" => $model,
+			"labels" => Cargo::attributeLabels(),
+			"container" => $container,
+			"total" => Cargo::getTotal($model)
+		);
+
+		if( !$partial ){
+			$this->render("cargo/adminIndex", $params);
+		}else{
+			$this->renderPartial("cargo/adminIndex", $params);
+		}
+	}
+
+	public function actionAdminCargoCreate($container_id)
+	{
+		$model = new Cargo;
+
+		if(isset($_POST["Cargo"])) {
+			if( $model->updateObj($_POST["Cargo"]) ){
+				$this->actionAdminCargoIndex(true, $container_id);
+				return true;
+			}
+		} else {
+			$this->renderPartial("cargo/adminCreate",array(
+				"model" => $model
+			));
+		}
+	}
+
+	public function actionAdminCargoUpdate($id, $container_id)
+	{
+		$model = Cargo::model()->findByPk($id);
+
+		if(isset($_POST["Cargo"])) {
+			if( $model->updateObj($_POST["Cargo"]) ){
+				$this->actionAdminCargoIndex(true, $container_id);
+				return true;
+			}
+		}else{
+			$this->renderPartial("cargo/adminUpdate",array(
+				"model" => $model,
+			));
+		}
+	}
+
+	public function actionAdminCargoDelete($id, $container_id)
+	{
+		Cargo::model()->findByPk($id)->delete();
+
+		$this->actionAdminCargoIndex(true, $container_id);
 	}
 
 	public function loadModel($id)

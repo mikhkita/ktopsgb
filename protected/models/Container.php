@@ -81,6 +81,7 @@ class Container extends CActiveRecord
 			"carrier" => array(self::BELONGS_TO, "Carrier", "carrier_id"),
 			"consignee" => array(self::BELONGS_TO, "Consignee", "consignee_id"),
 			"locations" => array(self::HAS_MANY, "Location", "container_id", "order" => "date DESC"),
+			"cargo" => array(self::HAS_MANY, "Cargo", "container_id"),
 		);
 	}
 

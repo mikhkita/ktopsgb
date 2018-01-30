@@ -136,6 +136,14 @@ class Controller extends CController
         return $ids;
     }
 
+    public function getAssoc($model, $field = NULL){
+        $out = array();
+        foreach ($model as $key => $value){
+            $out[(($field !== NULL)?$value[$field]:$value->id)] = $value;
+        }
+        return $out;
+    }
+
     public function readDates(&$model){
         $modelName = get_class($model);
 

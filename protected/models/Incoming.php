@@ -11,6 +11,9 @@
  */
 class Incoming extends CActiveRecord
 {
+	public $date_from = NULL;
+	public $date_to = NULL;
+
 	/**
 	 * @return string the associated database table name
 	 */
@@ -27,12 +30,13 @@ class Incoming extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("date, car, cargo", "required"),
+			array("date, car, place_id, cargo", "required"),
+			array("place_id", "numerical", "integerOnly" => true),
 			array("car", "length", "max" => 16),
 			array("cargo", "length", "max" => 64),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, date, car, cargo", "safe", "on" => "search"),
+			array("id, date, car, cargo, place_id", "safe", "on" => "search"),
 		);
 	}
 
@@ -44,6 +48,7 @@ class Incoming extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+			"place" => array(self::BELONGS_TO, "IncomingPlace", "place_id"),
 		);
 	}
 
@@ -57,6 +62,7 @@ class Incoming extends CActiveRecord
 			"date" => "Дата",
 			"car" => "Номер авто",
 			"cargo" => "Груз",
+			"place_id" => "Место",
 		);
 	}
 
@@ -72,24 +78,34 @@ class Incoming extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false)
+	public function search($pages, $count = false, $returnCriteria = false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
 		$criteria->order = "date DESC";
 
+		if( $this->date_from != NULL && $this->date_from != "__.__.____" ){
+			$criteria->addCondition("date >= '".date("Y-m-d H:i:s", strtotime($this->date_from))."'");
+		}
+		if( $this->date_to != NULL && $this->date_to != "__.__.____" ){
+			$criteria->addCondition("date <= '".date("Y-m-d H:i:s", strtotime($this->date_to))."'");
+		}
+
 		$criteria->compare("id", $this->id, true);
 		$criteria->compare("date", $this->date, true);
 		$criteria->addSearchCondition("car", $this->car);
 		$criteria->addSearchCondition("cargo", $this->cargo);
+		$criteria->compare("place_id", $this->place_id);
 
-		if( $count ){
+		if( $returnCriteria ){
+			return $criteria;
+		}else if( $count ){
 			return Incoming::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
 				"criteria" => $criteria,
-				"pagination" => array("pageSize" => $pages, "route" => "incoming/adminindex")
+				"pagination" => array("pageSize" => $pages, "route" => "board/adminindex")
 			));
 		}
 	}

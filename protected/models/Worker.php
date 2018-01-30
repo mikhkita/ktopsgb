@@ -6,11 +6,11 @@
  * The followings are the available columns in table "worker":
  * @property integer $id
  * @property string $name
+ * @property integer $post_id
+ * @property integer $salary
  */
 class Worker extends CActiveRecord
 {
-	public $cubages = array();
-
 	/**
 	 * @return string the associated database table name
 	 */
@@ -27,11 +27,12 @@ class Worker extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("name", "required"),
-			array("name", "length", "max" => 64),
+			array("name, post_id, salary", "required"),
+			array("post_id, salary", "numerical", "integerOnly" => true),
+			array("name", "length", "max" => 80),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, name", "safe", "on" => "search"),
+			array("id, name, post_id, salary", "safe", "on" => "search"),
 		);
 	}
 
@@ -43,7 +44,9 @@ class Worker extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			"saws" => array(self::HAS_MANY, "SawWorker", "worker_id"),
+			"relocs" => array(self::HAS_MANY, "Reloc", "worker_id"),
+			"salaries" => array(self::HAS_MANY, "Salary", "worker_id"),
+			"post" => array(self::BELONGS_TO, "Post", "post_id"),
 		);
 	}
 
@@ -54,8 +57,9 @@ class Worker extends CActiveRecord
 	{
 		return array(
 			"id" => "ID",
-			"name" => "Имя",
-			"salary" => "Зарплата",
+			"name" => "ФИО",
+			"post_id" => "Должность",
+			"salary" => "Оклад в день",
 		);
 	}
 
@@ -71,19 +75,19 @@ class Worker extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false, $returnCriteria = false)
+	public function search($pages, $count = false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->with = "saws.saw.planks";
+		$criteria->order = "name ASC";
 
 		$criteria->compare("id", $this->id);
 		$criteria->addSearchCondition("name", $this->name);
+		$criteria->compare("post_id", $this->post_id);
+		$criteria->compare("salary", $this->salary);
 
-		if( $returnCriteria ){
-			return $criteria;
-		}else if( $count ){
+		if( $count ){
 			return Worker::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
@@ -105,41 +109,6 @@ class Worker extends CActiveRecord
 		}else{
 			print_r($this->getErrors());
 			return false;
-		}
-	}
-
-	public function getMoney(){
-		$out = 0;
-
-		foreach ($this->saws as $i => $saw) {
-			$out += ($saw->saw->getMoney()/count($saw->saw->workers));
-		}
-
-		return $out;
-	}
-
-	public function getAllMoney($criteria){
-		$model = Worker::model()->findAll();
-
-		$out = 0;
-		foreach ($model as $key => $item) {
-			$out += $item->getMoney();
-		}
-		return $out;
-	}
-
-	public function getCubages(){
-		$this->cubages = array();
-
-		foreach ($this->saws as $i => $saw) {
-			foreach ($saw->saw->planks as $j => $plank) {
-				$group_id = $plank->plank->group_id;	
-				if( !isset($this->cubages[$group_id]) ){
-					$this->cubages[$group_id] = 0;
-				}
-				
-				$this->cubages[$group_id] = $this->cubages[$group_id] + ($plank->cubage/count($saw->saw->workers));
-			}
 		}
 	}
 
