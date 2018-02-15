@@ -496,6 +496,9 @@ h1.b-with-nav{
     .b-table tr:nth-child(2n+1){
         background-color: #F5E9BC;
     }
+    .b-table tr:not(:first-child):hover{
+        background-color: #FFF !important;
+    }
         .b-table th{
             padding: 5px;
         }
@@ -548,6 +551,9 @@ h1.b-with-nav{
     color: #F5E9BC;
     text-shadow: 0 2px 1px rgba(0,0,0,0.5);
     text-decoration: none;
+}
+.tc .b-butt{
+    float: none;
 }
     .b-butt:hover{
         background-color: #D26A44;
@@ -686,7 +692,8 @@ h1.b-with-nav{
             min-height: 101px;
         }
         .fancybox-skin .select2-choices, .fancybox-skin .select2-choice,
-        .b-filter .select2-choices, .b-filter .select2-choice{
+        .b-filter .select2-choices, .b-filter .select2-choice,
+        form.b-with-select2 .select2-choices, form.b-with-select2 .select2-choice{
             border-radius: 5px;
             background: #FFF5D1;
             border: 1px solid #452716;
@@ -694,9 +701,11 @@ h1.b-with-nav{
             font-size: 14px;
             display: block;
             width: 100%;
+            text-align: left;
         }
         .fancybox-skin .select2-choices,
-        .b-filter .select2-choices {
+        .b-filter .select2-choices,
+        form.b-with-select2 .select2-choices {
             padding: 1px 0 1px;
             max-width: 452px;
             min-width: 452px;
@@ -1520,9 +1529,11 @@ h1.b-with-nav{
         -ms-transition: all 300ms ease-in-out;
          -o-transition: all 300ms ease-in-out;
             transition: all 300ms ease-in-out;
+    visibility: hidden;
 }
     .b-upload-overlay-show{
         opacity: 1;
+        visibility: visible;
     }
 .upload h3{
     color: #F5E9BC;

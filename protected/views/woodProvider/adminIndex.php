@@ -7,6 +7,7 @@
 		<th><? echo $labels["name"]; ?></th>
 		<th><? echo $labels["phone"]; ?></th>
 		<th><? echo $labels["email"]; ?></th>
+		<th><? echo $labels["inn"]; ?></th>
 		<th><? echo $labels["sort"]; ?></th>
 		<th style="width: 100px;">Действия</th>
 	</tr>
@@ -16,6 +17,7 @@
 		<td><?php echo CHtml::activeTextField($filter, 'phone', array('tabindex' => 2, "placeholder" => "Поиск по телефону")); ?></td>
 		<td><?php echo CHtml::activeTextField($filter, 'email', array('tabindex' => 3, "placeholder" => "Поиск по E-mail")); ?></td>
 		<td></td>
+		<td></td>
 		<td><a href="#" class="b-clear-filter">Сбросить</a></td>
 	</tr>
 	<? foreach ($data as $i => $item): ?>
@@ -24,6 +26,7 @@
 			<td class="align-left"><? echo $item->name; ?></td>
 			<td class="align-left"><? echo $item->phone; ?></td>
 			<td class="align-left"><? echo $item->email; ?></td>
+			<td class="align-left"><? echo $item->inn; ?></td>
 			<td class="align-left"><? echo $item->sort; ?></td>
 			<td>
 				<? if( Yii::app()->user->checkAccess('updateWood') ): ?><a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$item->id))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>

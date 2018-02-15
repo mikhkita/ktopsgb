@@ -175,6 +175,97 @@ class Controller extends CController
         $model->date_to = $to;
     }
 
+    public function insertValues($tableName, $values){
+        if( !count($values) ) return true;
+
+        $values = array_values($values);
+        $structure = array();
+        foreach ($values[0] as $key => $value) {
+            $structure[] = "`".$key."`";
+        }
+
+        $structure = "(".implode(",", $structure).")";
+
+        $sql = "INSERT INTO `$tableName` ".$structure." VALUES ";
+
+        $vals = array();
+        foreach ($values as $value) {
+            $item = array();
+            foreach ($value as $el) {
+                if( $el === NULL ){
+                    $item[] = "NULL";
+                }else{
+                    $item[] = "'".addslashes($el)."'";
+                }
+            }
+            $vals[] = "(".implode(",", $item).")";
+        }
+
+        $sql .= implode(",", $vals);
+
+        return Yii::app()->db->createCommand($sql)->execute();
+    }
+
+    public function updateRows($table_name, $values = array(), $update){
+        $result = true;
+
+        if( count($values) ){
+            $query = Yii::app()->db->createCommand("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE `table_name` = '".$table_name."' AND `table_schema` = '".Yii::app()->params["dbname"]."'")->query();
+
+            $structure = array();
+            $primary_keys = array();
+            $columns = array();
+            $vals = array();
+            while($next = $query->read()){
+                if( !in_array("`".$next["COLUMN_NAME"]."`", $columns) ){
+                    array_push($columns, "`".$next["COLUMN_NAME"]."`");
+                    if( $next["COLUMN_KEY"] == "PRI" ) 
+                            array_push($primary_keys, "`".$next["COLUMN_NAME"]."`");
+                    $structure[$next["COLUMN_NAME"]] = $next["COLUMN_TYPE"]." ".(($next["IS_NULLABLE"] == "NO" && $next["EXTRA"] != "auto_increment")?"NOT ":"")."NULL";
+                }
+            }
+
+            $structure[0] = "PRIMARY KEY (".implode(",", $primary_keys).")";
+
+            $tmpName = "tmp_".md5(rand().time());
+
+            Yii::app()->db->createCommand()->createTable($tmpName, $structure, 'ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci');
+
+            $sql = "INSERT INTO `$tmpName` (".implode(",", $columns).") VALUES ";
+
+            foreach ($values as $arr) {
+                $strArr = array();
+                foreach ($arr as $item) {
+                    array_push($strArr, ( $item === NULL )?"NULL":( ($item == "LAST_INSERT_ID()")?$item:("'".$item."'")));
+                }
+                array_push($vals, "(".implode(",", $strArr).")");
+            }
+
+            $sql .= implode(",", $vals);
+
+            foreach ($update as &$item) {
+                $item = " ".$table_name.".".$item." = ".$tmpName.".".$item;
+            }
+
+            if( Yii::app()->db->createCommand($sql)->execute() ){
+                $sql = "INSERT INTO `$table_name` SELECT * FROM `$tmpName` ON DUPLICATE KEY UPDATE".implode(",", $update);
+                $result = Yii::app()->db->createCommand($sql)->execute();
+                
+                Yii::app()->db->createCommand()->dropTable($tmpName);
+            }else $result = false;
+        }
+
+        return $result;
+    }
+
+    public function removeKeys($arr, $keys){
+        foreach ($keys as $i => $key) {
+            if( isset($arr[$key]) )
+                unset($arr[$key]);
+        }
+        return $arr;
+    }
+
     public function isCurrentMonth($model){
         return $model->date_from == $this->getCurrentMonthFrom() && $model->date_to == NULL;
     }

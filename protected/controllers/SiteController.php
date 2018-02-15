@@ -89,7 +89,11 @@ class SiteController extends Controller
 			$model->attributes=$_POST["LoginForm"];
 			// validate user input and redirect to the previous page if valid
 			if($model->validate() && $model->login())
-				$this->redirect($this->createUrl(Yii::app()->params["defaultAdminRedirect"]));
+                foreach ($this->adminMenu["items"]as $key => $modelName) {
+                    if( $modelName->rule !== NULL && Yii::app()->user->checkAccess($modelName->rule) ){
+                        $this->redirect($this->createUrl("admin/".$modelName->code));
+                    }
+                }
 		}
 		// display the login form
 		$this->render("login",array("model" => $model));
@@ -234,6 +238,8 @@ class SiteController extends Controller
         // Просмотр статистики
         $auth->createOperation("readStats", "Просмотр статистики");
 
+        $auth->createOperation("adminAction", "Действия администратора");
+
         // Пользователи
         $auth->createOperation("readUser", "Просмотр пользователей");
         $auth->createOperation("updateUser", "Создание/изменение/удаление пользователей");
@@ -287,6 +293,10 @@ class SiteController extends Controller
         // Доски Чин
         $auth->createOperation("readBoard", "Просмотр раздела доски Чин");
         $auth->createOperation("updateBoard", "Создание/изменение/удаление раздела доски Чин");
+
+        // Платежные поручения
+        $auth->createOperation("readOrder", "Просмотр платежных поручений");
+        $auth->createOperation("updateOrder", "Создание/изменение/удаление платежных поручений");
 
     // Виджеты ------------------------------------------------ Виджеты
         // Статистика
@@ -362,6 +372,11 @@ class SiteController extends Controller
         $role->addChild("readReloc");
         $role->addChild("updateReloc");
 
+        // Управляющий платежными поручениями
+        $role = $auth->createRole("orderManager");
+        $role->addChild("readOrder");
+        $role->addChild("updateOrder");
+
         // Директор
         $role = $auth->createRole("director");
         $role->addChild("containerManager");
@@ -375,9 +390,11 @@ class SiteController extends Controller
         $role->addChild("sawManager");
         $role->addChild("workerManager");
         $role->addChild("relocManager");
+        $role->addChild("orderManager");
         $role->addChild("widgetStats");
 
         $role = $auth->createRole("root");
+        $role->addChild("adminAction");
         $role->addChild("userAdmin"); // Администрирование пользователей
         $role->addChild("director");
 

@@ -1,33 +1,22 @@
 <?php
 
 /**
- * This is the model class for table "wood_provider".
+ * This is the model class for table "company".
  *
- * The followings are the available columns in table "wood_provider":
- * @property string $id
+ * The followings are the available columns in table "company":
+ * @property integer $id
  * @property string $name
- * @property string $phone
- * @property string $email
- * @property integer $sort
+ * @property string $inn
  */
-class WoodProvider extends CActiveRecord
+class Company extends CActiveRecord
 {
 	/**
 	 * @return string the associated database table name
 	 */
 	public function tableName()
 	{
-		return "wood_provider";
+		return "company";
 	}
-
-	public function scopes()
-    {
-        return array(
-            "sorted" => array(
-                "order" => "t.sort ASC",
-            ),
-        );
-    }
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -37,15 +26,12 @@ class WoodProvider extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("name, sort", "required"),
-			array("sort", "numerical", "integerOnly"=>true),
-			array("name", "length", "max"=>256),
-			array("phone", "length", "max"=>20),
-			array("email", "length", "max"=>128),
-			array("inn", "length", "max"=>12),
+			array("name, inn", "required"),
+			array("name", "length", "max" => 64),
+			array("inn", "length", "max" => 12),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, inn, name, phone, email, sort", "safe", "on"=>"search"),
+			array("id, name, inn", "safe", "on" => "search"),
 		);
 	}
 
@@ -57,8 +43,7 @@ class WoodProvider extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			"woods" => array(self::HAS_MANY, "Wood", "provider_id"),
-			"correspondents" => array(self::HAS_MANY, "Correspondent", "provider_id"),
+			"orders" => array(self::HAS_MANY, "Order", "company_id"),
 		);
 	}
 
@@ -70,9 +55,6 @@ class WoodProvider extends CActiveRecord
 		return array(
 			"id" => "ID",
 			"name" => "Наименование",
-			"phone" => "Телефон",
-			"email" => "E-mail",
-			"sort" => "Сортировка",
 			"inn" => "ИНН",
 		);
 	}
@@ -94,19 +76,17 @@ class WoodProvider extends CActiveRecord
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->order = "sort ASC";
 
-		$criteria->compare("id", $this->id, true);
+		$criteria->compare("id", $this->id);
 		$criteria->addSearchCondition("name", $this->name);
-		$criteria->addSearchCondition("phone", $this->phone);
-		$criteria->addSearchCondition("email", $this->email);
+		$criteria->addSearchCondition("inn", $this->inn);
 
 		if( $count ){
-			return WoodProvider::model()->count($criteria);
+			return Company::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
 				"criteria" => $criteria,
-				"pagination" => array("pageSize" => $pages, "route" => "woodProvider/adminindex")
+				"pagination" => array("pageSize" => $pages, "route" => "company/adminindex")
 			));
 		}
 	}
@@ -130,7 +110,7 @@ class WoodProvider extends CActiveRecord
 	 * Returns the static model of the specified AR class.
 	 * Please note that you should have this exact method in all your CActiveRecord descendants!
 	 * @param string $className active record class name.
-	 * @return WoodProvider the static model class
+	 * @return Company the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{

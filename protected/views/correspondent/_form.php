@@ -8,16 +8,9 @@
 	<?php echo $form->errorSummary($model); ?>
 
 	<div class="row clearfix">
-		<div class="row-half">
-			<?php echo $form->labelEx($model, "name"); ?>
-			<?php echo $form->textField($model, "name", array("maxlength" => 256, "required" => true)); ?>
-			<?php echo $form->error($model, "name"); ?>
-		</div>
-		<div class="row-half">
-			<?php echo $form->labelEx($model, "sort"); ?>
-			<?php echo $form->textField($model, "sort", array("maxlength" => 6, "required" => true, "class" => "numeric")); ?>
-			<?php echo $form->error($model, "sort"); ?>
-		</div>
+		<?php echo $form->labelEx($model, "name"); ?>
+		<?php echo $form->textField($model, "name", array("maxlength" => 256, "required" => true)); ?>
+		<?php echo $form->error($model, "name"); ?>
 	</div>
 
 	<div class="row clearfix">
@@ -27,9 +20,9 @@
 			<?php echo $form->error($model, "inn"); ?>
 		</div>
 		<div class="row-half">
-			<?php echo $form->labelEx($model, "email"); ?>
-			<?php echo $form->textField($model, "email", array("maxlength" => 128, "class" => "email")); ?>
-			<?php echo $form->error($model, "email"); ?>
+			<?php echo $form->labelEx($model, "provider_id"); ?>
+			<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано")); ?>
+			<?php echo $form->error($model, "provider_id"); ?>
 		</div>
 	</div>
 

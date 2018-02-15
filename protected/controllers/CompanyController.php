@@ -1,6 +1,6 @@
 <?php
 
-class WoodProviderController extends Controller
+class CompanyController extends Controller
 {
 	public function filters()
 	{
@@ -14,11 +14,11 @@ class WoodProviderController extends Controller
 		return array(
 			array("allow",
 				"actions" => array("adminIndex"),
-				"roles" => array("readWood"),
+				"roles" => array("readOrder"),
 			),
 			array("allow",
 				"actions" => array("adminUpdate", "adminDelete", "adminCreate"),
-				"roles" => array("updateWood"),
+				"roles" => array("updateOrder"),
 			),
 			array("deny",
 				"users" => array("*"),
@@ -33,40 +33,36 @@ class WoodProviderController extends Controller
 			$this->pageTitle = $this->adminMenu["cur"]->name;
 		}
 
-        $filter = new WoodProvider('filter');
+        $filter = new Company('filter');
 
-		if (isset($_GET['WoodProvider'])){
-            $filter->attributes = $_GET['WoodProvider'];
+		if (isset($_GET['Company'])){
+            $filter->attributes = $_GET['Company'];
         }
 
         $dataProvider = $filter->search(50);
-		$woodProviderCount = $filter->search(50, true);
+		$count = $filter->search(50, true);
+
+		$params = array(
+			"data" => $dataProvider->getData(),
+			"pages" => $dataProvider->getPagination(),
+			"filter" => $filter,
+			"count" => $count,
+			"labels" => Company::attributeLabels(),
+		);
 
 		if( !$partial ){
-			$this->render("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"woodProviderCount" => $woodProviderCount,
-				"labels" => WoodProvider::attributeLabels(),
-			));
+			$this->render("adminIndex", $params);
 		}else{
-			$this->renderPartial("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"woodProviderCount" => $woodProviderCount,
-				"labels" => WoodProvider::attributeLabels(),
-			));
+			$this->renderPartial("adminIndex", $params);
 		}
 	}
 
 	public function actionAdminCreate()
 	{
-		$model = new WoodProvider;
+		$model = new Company;
 
-		if(isset($_POST["WoodProvider"])) {
-			if( $model->updateObj($_POST["WoodProvider"]) ){
+		if(isset($_POST["Company"])) {
+			if( $model->updateObj($_POST["Company"]) ){
 				$this->actionAdminIndex(true);
 				return true;
 			}
@@ -81,8 +77,8 @@ class WoodProviderController extends Controller
 	{
 		$model = $this->loadModel($id);
 
-		if(isset($_POST["WoodProvider"])) {
-			if( $model->updateObj($_POST["WoodProvider"]) ){
+		if(isset($_POST["Company"])) {
+			if( $model->updateObj($_POST["Company"]) ){
 				$this->actionAdminIndex(true);
 				return true;
 			}
@@ -102,7 +98,7 @@ class WoodProviderController extends Controller
 
 	public function loadModel($id)
 	{
-		$model = WoodProvider::model()->findByPk($id);
+		$model = Company::model()->findByPk($id);
 
 		if($model===null)
 			throw new CHttpException(404, "The requested page does not exist.");

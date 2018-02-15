@@ -10,26 +10,13 @@
 	<div class="row clearfix">
 		<div class="row-half">
 			<?php echo $form->labelEx($model, "name"); ?>
-			<?php echo $form->textField($model, "name", array("maxlength" => 256, "required" => true)); ?>
+			<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
 			<?php echo $form->error($model, "name"); ?>
 		</div>
 		<div class="row-half">
-			<?php echo $form->labelEx($model, "sort"); ?>
-			<?php echo $form->textField($model, "sort", array("maxlength" => 6, "required" => true, "class" => "numeric")); ?>
-			<?php echo $form->error($model, "sort"); ?>
-		</div>
-	</div>
-
-	<div class="row clearfix">
-		<div class="row-half">
 			<?php echo $form->labelEx($model, "inn"); ?>
-			<?php echo $form->textField($model, "inn", array("maxlength" => 12, "class" => "numeric")); ?>
+			<?php echo $form->textField($model, "inn", array("maxlength" => 12, "required" => true, "class" => "numeric")); ?>
 			<?php echo $form->error($model, "inn"); ?>
-		</div>
-		<div class="row-half">
-			<?php echo $form->labelEx($model, "email"); ?>
-			<?php echo $form->textField($model, "email", array("maxlength" => 128, "class" => "email")); ?>
-			<?php echo $form->error($model, "email"); ?>
 		</div>
 	</div>
 

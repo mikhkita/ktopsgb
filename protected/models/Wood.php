@@ -119,10 +119,10 @@ class Wood extends CActiveRecord
 			$criteria->addCondition("date <= '".date("Y-m-d H:i:s", strtotime($this->date_to))."'");
 		}
 
-		$criteria->compare("provider_id", $this->provider_id, true);
-		$criteria->compare("payment_id", $this->payment_id, true);
-		$criteria->compare("group_id", $this->group_id, true);
-		$criteria->compare("species_id", $this->species_id, true);
+		$criteria->compare("provider_id", $this->provider_id);
+		$criteria->compare("payment_id", $this->payment_id);
+		$criteria->compare("group_id", $this->group_id);
+		$criteria->compare("species_id", $this->species_id);
 
 		// $criteria->compare("date",$this->date,true);
 		$criteria->addSearchCondition("car", $this->car);

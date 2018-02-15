@@ -7,6 +7,13 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
+  'adminAction' => 
+  array (
+    'type' => 0,
+    'description' => 'Действия администратора',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'readUser' => 
   array (
     'type' => 0,
@@ -186,6 +193,20 @@ return array (
   array (
     'type' => 0,
     'description' => 'Создание/изменение/удаление раздела доски Чин',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readOrder' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр платежных поручений',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateOrder' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление платежных поручений',
     'bizRule' => NULL,
     'data' => NULL,
   ),
@@ -413,6 +434,31 @@ return array (
       1 => 'updateReloc',
     ),
   ),
+  'orderManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readOrder',
+      1 => 'updateOrder',
+    ),
+    'assignments' => 
+    array (
+      6 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      7 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
   'director' => 
   array (
     'type' => 2,
@@ -432,7 +478,8 @@ return array (
       8 => 'sawManager',
       9 => 'workerManager',
       10 => 'relocManager',
-      11 => 'widgetStats',
+      11 => 'orderManager',
+      12 => 'widgetStats',
     ),
     'assignments' => 
     array (
@@ -451,8 +498,9 @@ return array (
     'data' => NULL,
     'children' => 
     array (
-      0 => 'userAdmin',
-      1 => 'director',
+      0 => 'adminAction',
+      1 => 'userAdmin',
+      2 => 'director',
     ),
     'assignments' => 
     array (

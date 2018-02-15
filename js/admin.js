@@ -11,11 +11,17 @@ $(document).ready(function(){
     title = title.split(/[\/#?]+/);
     title = title[titleVar];
 
+    // bindUploader();
+
     $(".modules li[data-name='"+title+"'],.modules li[data-nameAlt='"+title+"']").addClass("active").parents(".b-menu-item").find(".b-menu-accordeon").addClass("opened");    
 
     setTimeout(function(){
         $("body").addClass("trans");
     },300);
+
+    customHandlers["submitFile"] = function(arr){
+        $("#fileForm").submit();
+    }
 
     $.datepicker.regional['ru'] = {
         closeText: 'Готово', // set a close button text
@@ -96,6 +102,7 @@ $(document).ready(function(){
         setTimeout(function(){
             bindFilter();
             bindTooltip();
+            bindImageUploader();
             bindAutocomplete();
         },100);
     }
@@ -147,7 +154,7 @@ $(document).ready(function(){
 
     function bindFilter(){
         if( $(".main .b-filter").length ){
-            $(".main form select, .main form input").bind("change",function(){
+            $(".main .b-filter").parents("form").find("select, input").bind("change",function(){
                 var $form = $(this).parents("form");
 
                 progress.setColor("#D26A44");
@@ -163,11 +170,11 @@ $(document).ready(function(){
                     }
                 });    
             });
-            $(".main form select, .main form input").bind("keyup", function(e){
+            $(".main .b-filter").parents("form").find("select, input").bind("keyup", function(e){
                 if( e.keyCode == 13 )
                     $(this).trigger("change");
             });
-            $(".main form").submit(function(){
+            $(".main .b-filter").parents("form").submit(function(){
                 return false;
             });
             $(".b-clear-filter").click(function(){
@@ -404,10 +411,10 @@ $(document).ready(function(){
     }
 
     function bindImageUploader(){
-        $(".b-get-image").click(function(){
-            $(".b-for-image-form").load($(this).parents(".b-image-cont").find(".b-get-image").attr("data-path"), {}, function(){
+        $(".b-get-file").click(function(){
+            $(".b-for-image-form").load($(this).attr("href"), {}, function(){
                 $(".upload").addClass("upload-show");
-                $(".b-upload-overlay").addClass("b-upload-overlay-show")
+                $(".b-upload-overlay").addClass("b-upload-overlay-show");
                 $(".plupload_cancel,.b-upload-overlay,.plupload_save").click(function(){
                     $(".b-upload-overlay").removeClass("b-upload-overlay-show");
                     $(".upload").addClass("upload-hide");
@@ -417,8 +424,25 @@ $(document).ready(function(){
                     return false;
                 });
             });
+            return false;
         });
     }
+
+    // function bindUploader(){
+    //     if( $(".b-get-file").length ){
+    //         $(".b-get-file").click(function(){
+    //             $(".upload").addClass("upload-show").removeClass("upload-hide");
+    //             $(".b-upload-overlay").addClass("b-upload-overlay-show");
+    //             return false;
+    //         });
+
+    //         $(".plupload_cancel,.b-upload-overlay,.plupload_save").click(function(){
+    //             $(".b-upload-overlay").removeClass("b-upload-overlay-show");
+    //             $(".upload").addClass("upload-hide");
+    //             return false;
+    //         });
+    //     }
+    // }
 
     /* TinyMCE ------------------------------------- TinyMCE */
     function bindTinymce(){
@@ -787,6 +811,40 @@ $(document).ready(function(){
         });
     }
     /* Left menu ----------------------------------- Left menu */
+
+    if( $(".b-ajax-update").length ){
+        $(".b-ajax-update").change(function(){
+            var $this = $(this),
+                $form = $this.parents("form"),
+                url = $form.attr("action"),
+                method = $form.attr("method"),
+                data = $form.serialize();
+
+            progress.setColor("#D26A44");
+            progress.start(2);
+
+            $.ajax({
+                url : url,
+                method : method,
+                data : data,
+                success: function(msg){
+                    var json = JSON.parse(msg);
+                    progress.end(function(){});
+                    if( json.result == "error" ){
+                        alert(json.error);
+                    }
+                    $this.val(json.category_id);
+                }
+            });   
+        });
+
+        if( $(".b-with-select2").length ){
+            $(".b-with-select2 .select2").select2({
+                placeholder: "",
+                allowClear: true
+            });   
+        }
+    }
 
     function transition(el,dur){
         el.css({
