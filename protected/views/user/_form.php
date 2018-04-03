@@ -21,7 +21,7 @@
 		</div>
 		<div class="row-half">
 			<?php echo $form->labelEx($model, "surname"); ?>
-			<?php echo $form->textField($model, "surname", array("maxlength" => 255, "required" => true)); ?>
+			<?php echo $form->textField($model, "surname", array("maxlength" => 255)); ?>
 			<?php echo $form->error($model, "surname"); ?>
 		</div>
 	</div>

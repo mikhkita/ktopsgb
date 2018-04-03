@@ -1,5 +1,19 @@
 <?php
 return array (
+  'readStats' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр статистики',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'adminAction' => 
+  array (
+    'type' => 0,
+    'description' => 'Действия администратора',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'readUser' => 
   array (
     'type' => 0,
@@ -70,13 +84,6 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
-  'widgetCash' => 
-  array (
-    'type' => 0,
-    'description' => 'Виджет',
-    'bizRule' => NULL,
-    'data' => NULL,
-  ),
   'readSaw' => 
   array (
     'type' => 0,
@@ -88,6 +95,62 @@ return array (
   array (
     'type' => 0,
     'description' => 'Создание/изменение/удаление пилорам',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readChina' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела рабочих китайцев',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateChina' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление рабочих китайцев',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readWorker' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела рабочих',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateWorker' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление рабочих',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readReloc' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр раздела перекладок',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateReloc' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление перекладок',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'readCorr' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр корреспондентов',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateCorr' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление корреспондентов',
     'bizRule' => NULL,
     'data' => NULL,
   ),
@@ -146,6 +209,31 @@ return array (
     'description' => 'Создание/изменение/удаление раздела доски Чин',
     'bizRule' => NULL,
     'data' => NULL,
+  ),
+  'readOrder' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр платежных поручений',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateOrder' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление платежных поручений',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'widgetStats' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readStats',
+    ),
   ),
   'userAdmin' => 
   array (
@@ -224,6 +312,18 @@ return array (
       ),
     ),
   ),
+  'corrManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readCorr',
+      1 => 'updateCorr',
+    ),
+  ),
   'woodManager' => 
   array (
     'type' => 2,
@@ -232,8 +332,9 @@ return array (
     'data' => NULL,
     'children' => 
     array (
-      0 => 'readWood',
-      1 => 'updateWood',
+      0 => 'corrManager',
+      1 => 'readWood',
+      2 => 'updateWood',
     ),
     'assignments' => 
     array (
@@ -295,6 +396,14 @@ return array (
       0 => 'readBoard',
       1 => 'updateBoard',
     ),
+    'assignments' => 
+    array (
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
   ),
   'sawManager' => 
   array (
@@ -307,6 +416,71 @@ return array (
       0 => 'readSaw',
       1 => 'updateSaw',
     ),
+    'assignments' => 
+    array (
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
+  'chinaManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readChina',
+      1 => 'updateChina',
+    ),
+  ),
+  'workerManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readWorker',
+      1 => 'updateWorker',
+    ),
+  ),
+  'relocManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readReloc',
+      1 => 'updateReloc',
+    ),
+  ),
+  'orderManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'corrManager',
+      1 => 'readOrder',
+      2 => 'updateOrder',
+    ),
+    'assignments' => 
+    array (
+      7 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
   ),
   'director' => 
   array (
@@ -317,13 +491,18 @@ return array (
     'children' => 
     array (
       0 => 'containerManager',
-      1 => 'readDryer',
+      1 => 'dryerManager',
       2 => 'cashManager',
-      3 => 'readWood',
-      4 => 'readBoard',
-      5 => 'readIncoming',
-      6 => 'readParabel',
-      7 => 'readSaw',
+      3 => 'woodManager',
+      4 => 'boardManager',
+      5 => 'incomingManager',
+      6 => 'parabelManager',
+      7 => 'chinaManager',
+      8 => 'sawManager',
+      9 => 'workerManager',
+      10 => 'relocManager',
+      11 => 'orderManager',
+      12 => 'widgetStats',
     ),
     'assignments' => 
     array (
@@ -342,14 +521,9 @@ return array (
     'data' => NULL,
     'children' => 
     array (
-      0 => 'userAdmin',
-      1 => 'dryerAdmin',
-      2 => 'woodManager',
-      3 => 'parabelManager',
-      4 => 'incomingManager',
-      5 => 'boardManager',
-      6 => 'sawManager',
-      7 => 'director',
+      0 => 'adminAction',
+      1 => 'userAdmin',
+      2 => 'director',
     ),
     'assignments' => 
     array (

@@ -12,7 +12,7 @@
 			<?php echo $form->textField($model, "date", array("maxlength" => 20, "required" => true, "class" => "date current" )); ?>
 			<?php echo $form->error($model, "date"); ?>
 		</div>
-		<div class="row-half">
+		<div class="row-half" style="display:none;">
 			<?php echo $form->labelEx($model, "sawmill_id"); ?>
 			<?php echo $form->dropDownList($model, "sawmill_id", CHtml::listData(Sawmill::model()->findAll(), 'id', 'name'), array("class" => "select2", "required" => true)); ?>
 			<?php echo $form->error($model, "sawmill_id"); ?>
@@ -33,9 +33,9 @@
 	</div>
 
 	<div class="row line-inputs">
-		<?php echo $form->labelEx($model, "workers"); ?>
-		<?=CHTML::checkBoxList("Worker", $workers, CHtml::listData(Worker::model()->findAll(), "id", "name"), array("separator" => "")); ?>
-		<?php echo $form->error($model, "workers"); ?>
+		<?php echo $form->labelEx($model, "chinese"); ?>
+		<?=CHTML::checkBoxList("China", $chinese, CHtml::listData(China::model()->findAll(), "id", "name"), array("separator" => "")); ?>
+		<?php echo $form->error($model, "chinese"); ?>
 	</div>
 
 	<div class="row buttons">

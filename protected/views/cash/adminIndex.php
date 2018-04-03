@@ -25,13 +25,14 @@
 		<th><?=$labels['reason']?></th>
 		<th><?=$labels['comment']?></th>
 		<th><?=$labels['sum']?></th>
-		<!-- <th><?=$labels['cheque']?></th> -->
+		<th><?=$labels['cheque']?></th>
 		<th style="width: 100px;">Действия</th>
 	</tr>
 	<tr class="b-filter">
 		<td><?php echo CHtml::activeTextField($filter, 'date_from', array('tabindex' => 0, "placeholder" => "От", "class" => "date")); ?><span class="filter-separator">-</span><?php echo CHtml::activeTextField($filter, 'date_to', array('tabindex' => 0, "placeholder" => "До", "class" => "date")); ?></td>
 		<td><?php echo CHtml::activeTextField($filter, 'reason', array('class'=>'autocomplete', 'tabindex' => 1, "placeholder" => "Поиск по пояснению", 'data-values' => Cash::getReasons($_GET["type_id"]))); ?></td>
 		<td><?php echo CHtml::activeTextField($filter, 'comment', array('tabindex' => 2, "placeholder" => "Поиск по комментарию")); ?></td>
+		<td></td>
 		<td></td>
 		<td><a href="#" class="b-clear-filter">Сбросить</a></td>
 	</tr>
@@ -43,6 +44,7 @@
 				<td><?=$item->reason?></td>
 				<td><?=$item->comment?></td>
 				<td class="tright <?=(($item->negative)?"red":"green")?>"><?=(($item->negative)?"-":"+")?><?=number_format( $item->sum, 0, ',', '&nbsp;' )?></td>
+				<td><?=(($item->cheque)?"Есть":"Отсутствует")?></td>
 				<td>
 					<? if( Yii::app()->user->checkAccess('updateCash') ): ?>
 						<a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$item->id, 'type_id' => $_GET["type_id"]))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>

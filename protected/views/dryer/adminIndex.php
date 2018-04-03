@@ -11,7 +11,8 @@
 		<th><?=$queueLabels['packs']?></th>
 		<th><?=$queueLabels['rows']?></th>
 		<th><?=$queueLabels['comment']?></th>
-		<th style="width: 130px;">Действия</th>
+		<th><?=$labels['switch']?></th>
+		<th style="width: 200px;">Действия</th>
 	</tr>
 	<? foreach ($data as $i => $item): ?>
 		<tr>
@@ -24,11 +25,19 @@
 				<td><?=$item->queue[0]->packs?></td>
 				<td><?=$item->queue[0]->rows?></td>
 				<td><?=$item->queue[0]->comment?></td>
+				<td class="on <?=(($item->switch)?"green":"")?>"><?=(($item->switch)?"Работает":"Выключена")?></td>
 			<? else: ?>
-				<td colspan="6" class="orange">Не загружена</td>
+				<td colspan="7" class="orange tc">Не загружена</td>
 			<? endif; ?>
 			<td>
 				<? if( Yii::app()->user->checkAccess('updateDryerQueue') ): ?>
+					<a href="#" class="b-kit-switcher left<?=(($item->switch)?" checked":"")?>" data-on="updateDryer" data-off="updateDryer" data-on-href="<?=Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminon',array('id'=>$item->id))?>" data-off-href="<?=Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminoff',array('id'=>$item->id))?>" >
+					    <div class="b-kit-rail">
+					        <div class="b-kit-state1">Вкл.</div>
+					        <div class="b-kit-slider"></div>
+					        <div class="b-kit-state2">Выкл.</div>
+					    </div>
+					</a>
 					<? if( count($item->queue) > 0 ): ?>
 						<a href="<?=Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminqueueupdate',array('id' => $item->queue[0]->id, 'dryers' => true))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Править загрузку"></a>
 						<a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminqueuecomplete',array('id' => $item->queue[0]->id))?>" class="ajax-form ajax-update b-tool b-tool-out" title="Добавить выгрузку"></a>

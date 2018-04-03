@@ -26,11 +26,18 @@ class IncomingController extends Controller
 		);
 	}
 
-	public function actionAdminIndex($partial = false){
+	public function actionAdminIndex($partial = false, $place_id = NULL){
 		unset($_GET["partial"]);
 		if( !$partial ){
 			$this->layout = "admin";
 			$this->pageTitle = $this->adminMenu["cur"]->name;
+		}
+
+		// Если не указан тип, то редиректить на первый
+		$places = IncomingPlace::model()->findAll();
+		if( $place_id === NULL ){
+			header("Location: ".$this->createUrl('/'.$this->adminMenu["cur"]->code.'/adminindex', array("place_id" => $places[0]->id)));
+			die();
 		}
 
         $filter = new Incoming('filter');
@@ -39,35 +46,38 @@ class IncomingController extends Controller
             $filter->attributes = $_GET['Incoming'];
         }
 
+        $this->readDates($filter);
+
+        $filter->place_id = $place_id;
+
         $dataProvider = $filter->search(50);
-		$incomingCount = $filter->search(50, true);
+		$count = $filter->search(50, true);
+
+		$params = array(
+			"data" => $dataProvider->getData(),
+			"pages" => $dataProvider->getPagination(),
+			"filter" => $filter,
+			"count" => $count,
+			"labels" => Incoming::attributeLabels(),
+			"places" => $places,
+			"curPlace" => IncomingPlace::model()->findByPk($place_id),
+		);
 
 		if( !$partial ){
-			$this->render("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"incomingCount" => $incomingCount,
-				"labels" => Incoming::attributeLabels(),
-			));
+			$this->render("adminIndex", $params);
 		}else{
-			$this->renderPartial("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"incomingCount" => $incomingCount,
-				"labels" => Incoming::attributeLabels(),
-			));
+			$this->renderPartial("adminIndex", $params);
 		}
 	}
 
-	public function actionAdminCreate()
+	public function actionAdminCreate($place_id)
 	{
 		$model = new Incoming;
+		$model->place_id = $place_id;
 
 		if(isset($_POST["Incoming"])) {
 			if( $model->updateObj($_POST["Incoming"]) ){
-				$this->actionAdminIndex(true);
+				$this->actionAdminIndex(true, $place_id);
 				return true;
 			}
 		} else {
@@ -83,7 +93,7 @@ class IncomingController extends Controller
 
 		if(isset($_POST["Incoming"])) {
 			if( $model->updateObj($_POST["Incoming"]) ){
-				$this->actionAdminIndex(true);
+				$this->actionAdminIndex(true, $model->place_id);
 				return true;
 			}
 		}else{
@@ -93,11 +103,11 @@ class IncomingController extends Controller
 		}
 	}
 
-	public function actionAdminDelete($id)
+	public function actionAdminDelete($id, $place_id)
 	{
 		$this->loadModel($id)->delete();
 
-		$this->actionAdminindex(true);
+		$this->actionAdminindex(true, $place_id);
 	}
 
 	public function loadModel($id)

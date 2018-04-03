@@ -1,33 +1,29 @@
-<? if( Yii::app()->user->checkAccess('updateSaw') ): ?><a href="<?php echo $this->createUrl("/".$this->adminMenu["cur"]->code."/adminCreate")?>" class="ajax-form ajax-create b-butt b-top-butt">Добавить</a><? endif; ?>
+<? if( Yii::app()->user->checkAccess('updateWorker') ): ?><a href="<?php echo $this->createUrl("/".$this->adminMenu["cur"]->code."/adminCreate")?>" class="ajax-form ajax-create b-butt b-top-butt">Добавить</a><? endif; ?>
 <h1><?=$this->adminMenu["cur"]->name?></h1>
 <?php $form=$this->beginWidget('CActiveForm'); ?>
 <table class="b-table" border="1">
 	<tr>
+		<th style="width: 30px;">№</th>
 		<th><? echo $labels["name"]; ?></th>
-		<? foreach ($plankGroups as $key => $plankGroup): ?>
-			<th><?=$plankGroup->name?></th>
-		<? endforeach; ?>
+		<th><? echo $labels["post_id"]; ?></th>
 		<th><? echo $labels["salary"]; ?></th>
 		<th style="width: 100px;">Действия</th>
 	</tr>
 	<tr class="b-filter">
-		<td><?php echo CHtml::activeTextField($filter, 'name', array('tabindex' => 1, "placeholder" => "Поиск по имени")); ?></td>
-		<? foreach ($plankGroups as $key => $plankGroup): ?>
-			<td></td>
-		<? endforeach; ?>
+		<td></td>
+		<td><?php echo CHtml::activeTextField($filter, 'name', array('tabindex' => 1, "placeholder" => "Поиск по наименованию")); ?></td>
+		<td><?php echo CHtml::activeDropDownList($filter, 'post_id', CHtml::listData(Post::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не важно", "tabindex" => 1, "placeholder" => "Поиск по должности")); ?></td>
 		<td></td>
 		<td><a href="#" class="b-clear-filter">Сбросить</a></td>
 	</tr>
 	<? foreach ($data as $i => $item): ?>
-		<? $item->getCubages(); ?>
 		<tr>
-			<td class="align-left"><? echo $item->name; ?></td>
-			<? foreach ($plankGroups as $key => $plankGroup): ?>
-				<td><? if( isset($item->cubages[$plankGroup->id]) ): ?><?=number_format( $item->cubages[$plankGroup->id], 2, '.', '&nbsp;' )?><? endif; ?></td>
-			<? endforeach; ?>
-			<td class="tr"><?=number_format( $item->getMoney(), 2, '.', '&nbsp;' )?></td>
+			<td><? echo $item->id; ?></td>
+			<td><? echo $item->name; ?></td>
+			<td><? echo $item->post->name; ?></td>
+			<td><? echo $item->salary; ?></td>
 			<td>
-				<? if( Yii::app()->user->checkAccess('updateSaw') ): ?><a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$item->id))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>
+				<? if( Yii::app()->user->checkAccess('updateWorker') ): ?><a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$item->id))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>
 				<a href="<?=Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/admindelete',array('id'=>$item->id))?>" class="ajax-form ajax-delete b-tool b-tool-delete" title="Удалить <?=$this->adminMenu["cur"]->vin_name?>"></a><? endif; ?>
 			</td>
 		</tr>
@@ -44,10 +40,4 @@
         'nextPageLabel' => 'далее >'
     )) ?>
     <div class="b-lot-count">Всего рабочих: <?=$count?></div>
-    <div class="b-total right">
-		<div class="b-total-row">
-			<span class="b-total-name">Итого зарплата: </span>
-			<span class="b-total-bold"><?=number_format( $total, 2, '.', '&nbsp;' )?></span>
-		</div>
-	</div>
 </div>

@@ -100,15 +100,32 @@
 			<?php echo $form->textField($model, "issue_date", array("maxlength" => 20, "class" => "date" )); ?>
 			<?php echo $form->error($model, "issue_date"); ?>
 		</div>
-		<div class="row-fourth">
+		<div class="row-half">
 			<?php echo $form->labelEx($model, "consignee_id"); ?>
 			<?php echo $form->dropDownList($model, "consignee_id", CHtml::listData(Consignee::model()->findAll(), "id", "name"), array("class" => "select2", "empty" => "Не задано")); ?>
 			<?php echo $form->error($model, "consignee_id"); ?>
+		</div>
+	</div>
+	<div class="row clearfix">
+		<div class="row-fourth">
+			<?php echo $form->labelEx($model, "custom_date"); ?>
+			<?php echo $form->textField($model, "custom_date", array("maxlength" => 20, "class" => "date" )); ?>
+			<?php echo $form->error($model, "custom_date"); ?>
 		</div>
 		<div class="row-fourth">
 			<?php echo $form->labelEx($model, "border_date"); ?>
 			<?php echo $form->textField($model, "border_date", array("maxlength" => 20, "class" => "date" )); ?>
 			<?php echo $form->error($model, "border_date"); ?>
+		</div>
+		<div class="row-fourth">
+			<?php echo $form->labelEx($model, "arrival_date"); ?>
+			<?php echo $form->textField($model, "arrival_date", array("maxlength" => 20, "class" => "date" )); ?>
+			<?php echo $form->error($model, "arrival_date"); ?>
+		</div>
+		<div class="row-fourth">
+			<?php echo $form->labelEx($model, "container_date"); ?>
+			<?php echo $form->textField($model, "container_date", array("maxlength" => 20, "class" => "date" )); ?>
+			<?php echo $form->error($model, "container_date"); ?>
 		</div>
 	</div>
 	<div class="row clearfix">
@@ -117,37 +134,31 @@
 			<?php echo $form->textArea($model, "container_place", array("maxlength" => 5000)); ?>
 			<?php echo $form->error($model, "container_place"); ?>
 		</div>
-		<div class="row-half row">
-			<?php echo $form->labelEx($model, "arrival_date"); ?>
-			<?php echo $form->textField($model, "arrival_date", array("maxlength" => 20, "class" => "date" )); ?>
-			<?php echo $form->error($model, "arrival_date"); ?>
-		</div>
 		<div class="row-half">
-			<?php echo $form->labelEx($model, "container_date"); ?>
-			<?php echo $form->textField($model, "container_date", array("maxlength" => 20, "class" => "date" )); ?>
-			<?php echo $form->error($model, "container_date"); ?>
-		</div>
-	</div>
-	<div class="row clearfix">
-		<div class="row-fourth">
-			<?php echo $form->labelEx($model, "kc"); ?>
-			<?php echo $form->textField($model, "kc", array("maxlength" => 30)); ?>
-			<?php echo $form->error($model, "kc"); ?>
-		</div>
-		<div class="row-fourth">
-			<?php echo $form->labelEx($model, "st"); ?>
-			<?php echo $form->textField($model, "st", array("maxlength" => 30)); ?>
-			<?php echo $form->error($model, "st"); ?>
-		</div>
-		<div class="row-fourth">
-			<?php echo $form->labelEx($model, "dhl_st"); ?>
-			<?php echo $form->textField($model, "dhl_st", array("maxlength" => 30)); ?>
-			<?php echo $form->error($model, "dhl_st"); ?>
-		</div>
-		<div class="row-fourth">
-			<?php echo $form->labelEx($model, "dhl_fit"); ?>
-			<?php echo $form->textField($model, "dhl_fit", array("maxlength" => 30)); ?>
-			<?php echo $form->error($model, "dhl_fit"); ?>
+			<div class="row clearfix">
+				<div class="row-half">
+					<?php echo $form->labelEx($model, "kc"); ?>
+					<?php echo $form->textField($model, "kc", array("maxlength" => 30)); ?>
+					<?php echo $form->error($model, "kc"); ?>
+				</div>
+				<div class="row-half" style="margin-right: 0px;">
+					<?php echo $form->labelEx($model, "st"); ?>
+					<?php echo $form->textField($model, "st", array("maxlength" => 30)); ?>
+					<?php echo $form->error($model, "st"); ?>
+				</div>
+			</div>
+			<div class="row clearfix">
+				<div class="row-half">
+					<?php echo $form->labelEx($model, "dhl_st"); ?>
+					<?php echo $form->textField($model, "dhl_st", array("maxlength" => 30)); ?>
+					<?php echo $form->error($model, "dhl_st"); ?>
+				</div>
+				<div class="row-half">
+					<?php echo $form->labelEx($model, "dhl_fit"); ?>
+					<?php echo $form->textField($model, "dhl_fit", array("maxlength" => 30)); ?>
+					<?php echo $form->error($model, "dhl_fit"); ?>
+				</div>
+			</div>
 		</div>
 	</div>
 

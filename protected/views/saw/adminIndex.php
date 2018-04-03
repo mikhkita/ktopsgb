@@ -18,7 +18,7 @@
 			<th><?=$plank->name?> (<?=$plank->group->short?>)</th>
 		<? endforeach; ?>
 		<th><?=$labels["salary"]?></th>
-		<th style="width: 80px;">Действия</th>
+		<th style="width: 90px;">Действия</th>
 	</tr>
 	<tr class="b-filter">
 		<td></td>
@@ -40,6 +40,7 @@
 				<td>
 					<? if( Yii::app()->user->checkAccess("updateSaw") ): ?>
 						<a href="<?php echo Yii::app()->createUrl("/".$this->adminMenu["cur"]->code."/adminupdate",array("id"=>$item->id, "sawmill_id" => $_GET["sawmill_id"]))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>
+						<a href="<?=Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/admindelete',array('id'=>$item->id, "sawmill_id" => $_GET["sawmill_id"]))?>" class="ajax-form ajax-delete b-tool b-tool-delete" title="Удалить <?=$this->adminMenu["cur"]->vin_name?>"></a></a>
 					<? endif; ?>
 				</td>
 			</tr>

@@ -89,7 +89,11 @@ class SiteController extends Controller
 			$model->attributes=$_POST["LoginForm"];
 			// validate user input and redirect to the previous page if valid
 			if($model->validate() && $model->login())
-				$this->redirect($this->createUrl(Yii::app()->params["defaultAdminRedirect"]));
+                foreach ($this->adminMenu["items"]as $key => $modelName) {
+                    if( $modelName->rule !== NULL && Yii::app()->user->checkAccess($modelName->rule) ){
+                        $this->redirect($this->createUrl("admin/".$modelName->code));
+                    }
+                }
 		}
 		// display the login form
 		$this->render("login",array("model" => $model));
@@ -231,6 +235,11 @@ class SiteController extends Controller
         //Операции управления пользователями.
         // $bizRule="return Yii::app()->user->id == $params["id"];";
 
+        // Просмотр статистики
+        $auth->createOperation("readStats", "Просмотр статистики");
+
+        $auth->createOperation("adminAction", "Действия администратора");
+
         // Пользователи
         $auth->createOperation("readUser", "Просмотр пользователей");
         $auth->createOperation("updateUser", "Создание/изменение/удаление пользователей");
@@ -248,11 +257,26 @@ class SiteController extends Controller
         // Платежи
         $auth->createOperation("readCash", "Просмотр раздела платежей");
         $auth->createOperation("updateCash", "Создание/изменение/удаление платежей");
-        $auth->createOperation("widgetCash", "Виджет");
 
         // Пилорамы
         $auth->createOperation("readSaw", "Просмотр раздела пилорам");
         $auth->createOperation("updateSaw", "Создание/изменение/удаление пилорам");
+
+        // Китайцы
+        $auth->createOperation("readChina", "Просмотр раздела рабочих китайцев");
+        $auth->createOperation("updateChina", "Создание/изменение/удаление рабочих китайцев");
+
+        // Рабочие
+        $auth->createOperation("readWorker", "Просмотр раздела рабочих");
+        $auth->createOperation("updateWorker", "Создание/изменение/удаление рабочих");
+
+        // Перекладка
+        $auth->createOperation("readReloc", "Просмотр раздела перекладок");
+        $auth->createOperation("updateReloc", "Создание/изменение/удаление перекладок");
+
+        // Корреспонденты
+        $auth->createOperation("readCorr", "Просмотр корреспондентов");
+        $auth->createOperation("updateCorr", "Создание/изменение/удаление корреспондентов");
 
         // $bizRule = 'return $params["type_id"] == 2;';
         // $task = $auth->createTask("updateFinCash", "Создание/изменение/удаление платежей в разделе финансов", $bizRule);
@@ -273,6 +297,16 @@ class SiteController extends Controller
         // Доски Чин
         $auth->createOperation("readBoard", "Просмотр раздела доски Чин");
         $auth->createOperation("updateBoard", "Создание/изменение/удаление раздела доски Чин");
+
+        // Платежные поручения
+        $auth->createOperation("readOrder", "Просмотр платежных поручений");
+        $auth->createOperation("updateOrder", "Создание/изменение/удаление платежных поручений");
+
+    // Виджеты ------------------------------------------------ Виджеты
+        // Статистика
+        $role = $auth->createRole("widgetStats");
+        $role->addChild("readStats");
+    // Виджеты ------------------------------------------------ Виджеты
 
     // Роли --------------------------------------------------- Роли
 
@@ -302,8 +336,14 @@ class SiteController extends Controller
         $role->addChild("readCash");
         $role->addChild("updateCash");
 
+        // Управляющий корреспондентами
+        $role = $auth->createRole("corrManager");
+        $role->addChild("readCorr");
+        $role->addChild("updateCorr");
+
         // Управляющий отгрузками
         $role = $auth->createRole("woodManager");
+        $role->addChild("corrManager");
         $role->addChild("readWood");
         $role->addChild("updateWood");
 
@@ -327,25 +367,46 @@ class SiteController extends Controller
         $role->addChild("readSaw");
         $role->addChild("updateSaw");
 
+        // Управляющий китайцами
+        $role = $auth->createRole("chinaManager");
+        $role->addChild("readChina");
+        $role->addChild("updateChina");
+
+        // Управляющий рабочими
+        $role = $auth->createRole("workerManager");
+        $role->addChild("readWorker");
+        $role->addChild("updateWorker");
+
+        // Управляющий перекладкой
+        $role = $auth->createRole("relocManager");
+        $role->addChild("readReloc");
+        $role->addChild("updateReloc");
+
+        // Управляющий платежными поручениями
+        $role = $auth->createRole("orderManager");
+        $role->addChild("corrManager");
+        $role->addChild("readOrder");
+        $role->addChild("updateOrder");
+
         // Директор
         $role = $auth->createRole("director");
         $role->addChild("containerManager");
-        $role->addChild("readDryer"); // Может только просматривать сушилки
+        $role->addChild("dryerManager"); // Может только просматривать сушилки
         $role->addChild("cashManager");
-        $role->addChild("readWood");
-        $role->addChild("readBoard");
-        $role->addChild("readIncoming");
-        $role->addChild("readParabel");
-        $role->addChild("readSaw");
+        $role->addChild("woodManager");
+        $role->addChild("boardManager");
+        $role->addChild("incomingManager");
+        $role->addChild("parabelManager");
+        $role->addChild("chinaManager");
+        $role->addChild("sawManager");
+        $role->addChild("workerManager");
+        $role->addChild("relocManager");
+        $role->addChild("orderManager");
+        $role->addChild("widgetStats");
 
         $role = $auth->createRole("root");
+        $role->addChild("adminAction");
         $role->addChild("userAdmin"); // Администрирование пользователей
-        $role->addChild("dryerAdmin"); // Администрирование сушилок
-        $role->addChild("woodManager");
-        $role->addChild("parabelManager");
-        $role->addChild("incomingManager");
-        $role->addChild("boardManager");
-        $role->addChild("sawManager");
         $role->addChild("director");
 
     // Роли --------------------------------------------------- Роли

@@ -43,25 +43,22 @@ class ParabelController extends Controller
 
         $dataProvider = $filter->search(50);
 		$parabelCount = $filter->search(50, true);
+		$total = $filter->getTotal($filter->search(999999, false, true));
+
+		$params = array(
+			"data" => $dataProvider->getData(),
+			"pages" => $dataProvider->getPagination(),
+			"filter" => $filter,
+			"parabelCount" => $parabelCount,
+			"labels" => Parabel::attributeLabels(),
+			"providers" => ParabelProvider::model()->sorted()->findAll(),
+			"total" => $total,
+		);
 
 		if( !$partial ){
-			$this->render("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"parabelCount" => $parabelCount,
-				"labels" => Parabel::attributeLabels(),
-				"providers" => ParabelProvider::model()->sorted()->findAll(),
-			));
+			$this->render("adminIndex", $params);
 		}else{
-			$this->renderPartial("adminIndex",array(
-				"data" => $dataProvider->getData(),
-				"pages" => $dataProvider->getPagination(),
-				"filter" => $filter,
-				"parabelCount" => $parabelCount,
-				"labels" => Parabel::attributeLabels(),
-				"providers" => ParabelProvider::model()->sorted()->findAll(),
-			));
+			$this->renderPartial("adminIndex", $params);
 		}
 	}
 

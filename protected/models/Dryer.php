@@ -3,7 +3,7 @@
 /**
  * This is the model class for table "dryer".
  *
- * The followings are the available columns in table 'dryer':
+ * The followings are the available columns in table "dryer":
  * @property string $id
  * @property string $number
  */
@@ -14,7 +14,7 @@ class Dryer extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'dryer';
+		return "dryer";
 	}
 
 	/**
@@ -25,11 +25,11 @@ class Dryer extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('number', 'required'),
-			array('number', 'length', 'max'=>128),
+			array("number, switch", "required"),
+			array("number", "length", "max"=>128),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('id, number', 'safe', 'on'=>'search'),
+			array("id, switch, number", "safe", "on"=>"search"),
 		);
 	}
 
@@ -41,7 +41,7 @@ class Dryer extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'queue' => array(self::HAS_MANY, 'DryerQueue', 'dryer_id'),
+			"queue" => array(self::HAS_MANY, "DryerQueue", "dryer_id"),
 		);
 	}
 
@@ -51,8 +51,9 @@ class Dryer extends CActiveRecord
 	public function attributeLabels()
 	{
 		return array(
-			'id' => 'ID',
-			'number' => '№',
+			"id" => "ID",
+			"number" => "№",
+			"switchw" => "Статус",
 		);
 	}
 
@@ -74,11 +75,11 @@ class Dryer extends CActiveRecord
 
 		$criteria=new CDbCriteria;
 
-		$criteria->compare('id',$this->id,true);
-		$criteria->compare('number',$this->number,true);
+		$criteria->compare("id",$this->id,true);
+		$criteria->compare("number",$this->number,true);
 
 		return new CActiveDataProvider($this, array(
-			'criteria'=>$criteria,
+			"criteria"=>$criteria,
 		));
 	}
 

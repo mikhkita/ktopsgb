@@ -12,7 +12,7 @@ class UploaderController extends Controller
     public function accessRules() {
         return array(
             array('allow',
-                'actions' => array('index','upload','getForm'),
+                'actions' => array('index','upload','form'),
                 'users' => array('*')
             )
         );
@@ -20,7 +20,7 @@ class UploaderController extends Controller
 
     /*! Всплывающее окно с формой для загрузки изображений.\n
     Плагин plupload. */
-    public function actionGetForm() {
+    public function actionForm() {
         $this->renderPartial('form');
     }
 

@@ -41,6 +41,7 @@ class WoodController extends Controller
 		}
 
         $filter = new Wood('filter');
+        $filter->group_id = NULL;
 
 		if (isset($_GET['Wood'])){
             $filter->attributes = $_GET['Wood'];
@@ -50,7 +51,7 @@ class WoodController extends Controller
 
 		$filter->payment_id = $payment_id;
 
-        $dataProvider = $filter->search(50);
+        $dataProvider = $filter->search(50, false, false, array("provider", "species") );
 		$woodCount = $filter->search(50, true);
 		$totals = $filter->getTotals( $filter->search(999999, false, true) );
 

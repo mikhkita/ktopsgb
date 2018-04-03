@@ -7,9 +7,11 @@
 
 	<?php echo $form->errorSummary($model); ?>
 	<div class="row clearfix">
-		<div class="row-half" style="display:none;">
-			<?php echo $form->textField($model, "container_id", array("maxlength" => 50)); ?>
-		</div>
+		<? if(isset($model->container_id)): ?>
+			<div class="row-half" style="display:none;">
+				<?php echo $form->textField($model, "container_id", array("maxlength" => 50)); ?>
+			</div>
+		<? endif; ?>
 		<?php echo $form->labelEx($model,"name"); ?>
 		<?php echo $form->textField($model,"name", array("maxlength" => 128, "required" => true)); ?>
 		<?php echo $form->error($model,"name"); ?>

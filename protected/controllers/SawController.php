@@ -74,7 +74,7 @@ class SawController extends Controller
 		$model->sawmill_id = $sawmill_id;
 
 		if(isset($_POST["Saw"])) {
-			if( $model->updateObj($_POST["Saw"], $_POST["Plank"], $_POST["Worker"]) ){
+			if( $model->updateObj($_POST["Saw"], $_POST["Plank"], $_POST["China"]) ){
 				$this->actionAdminIndex(true, $model->sawmill_id);
 				return true;
 			}
@@ -92,34 +92,36 @@ class SawController extends Controller
 		$model->getCubages();
 
 		if(isset($_POST["Saw"])) {
-			if( $model->updateObj($_POST["Saw"], $_POST["Plank"], $_POST["Worker"]) ){
+			if( $model->updateObj($_POST["Saw"], $_POST["Plank"], $_POST["China"]) ){
 				$this->actionAdminIndex(true, $model->sawmill_id);
 				return true;
 			}
 		}else{
-			$workers = array();
-			foreach ($model->workers as $key => $worker) {
-				array_push($workers, $worker->worker_id);
+			$chinese = array();
+			foreach ($model->chinese as $key => $china) {
+				array_push($chinese, $china->china_id);
 			}
 
-			$this->renderPartial("adminUpdate",array(
+			$this->renderPartial("adminUpdate", array(
 				"model" => $model,
 				"planks" => Plank::model()->with("group")->findAll(),
-				"workers" => $workers,
+				"chinese" => $chinese,
 			));
 		}
 	}
 
 	public function actionAdminDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$model = $this->loadModel($id);
+		$sawmill_id = $model->sawmill_id;
+		$model->delete();
 
-		$this->actionAdminindex(true);
+		$this->actionAdminindex(true, $sawmill_id);
 	}
 
 	public function loadModel($id)
 	{
-		$model = Saw::model()->with("planks", "workers")->findByPk($id);
+		$model = Saw::model()->with("planks", "chinese")->findByPk($id);
 
 		if($model===null)
 			throw new CHttpException(404, "The requested page does not exist.");

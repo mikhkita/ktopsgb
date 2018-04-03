@@ -4,18 +4,25 @@ $(document).ready(function(){
         myHeight,
         title = window.location.href,
         titleVar = ( title.split("localhost").length > 1 )?4:3,
-        progress = new KitProgress("#FFF",2);
+        progress = new KitProgress("#FFF",2),
+        shift = false;
 
     progress.endDuration = 0.3;
 
     title = title.split(/[\/#?]+/);
     title = title[titleVar];
 
+    // bindUploader();
+
     $(".modules li[data-name='"+title+"'],.modules li[data-nameAlt='"+title+"']").addClass("active").parents(".b-menu-item").find(".b-menu-accordeon").addClass("opened");    
 
     setTimeout(function(){
         $("body").addClass("trans");
     },300);
+
+    customHandlers["submitFile"] = function(arr){
+        $("#fileForm").submit();
+    }
 
     $.datepicker.regional['ru'] = {
         closeText: 'Готово', // set a close button text
@@ -65,6 +72,7 @@ $(document).ready(function(){
             bindAutocomplete();
             bindTooltip();
             bindNewInputs();
+            bindBoardForm();
             if( $form.attr("data-beforeShow") && customHandlers[$form.attr("data-beforeShow")] ){
                 customHandlers[$form.attr("data-beforeShow")]($form);
             }
@@ -80,6 +88,13 @@ $(document).ready(function(){
         }
     });
 
+    $("body").on("click", ".require-checkbox", function(){
+        if( $("#b-sess-checkbox-list").text() == "" ){
+            alert("Не выделено ни одного элемента");
+            return false;
+        }
+    });
+
     $(document).on("click",".ajax-delete", function(){
         $.fancybox.open({
             padding: 0,
@@ -92,9 +107,13 @@ $(document).ready(function(){
     function setResult(html){
         $(".b-main-center").html(html);
 
+        window.onbeforeunload = null;
+
         setTimeout(function(){
             bindFilter();
             bindTooltip();
+            bindTableForm();
+            bindImageUploader();
             bindAutocomplete();
         },100);
     }
@@ -124,6 +143,11 @@ $(document).ready(function(){
     }
 
     $("body").on("click", ".ajax-action", function(){
+        if( $(this).hasClass("require-checkbox") && $("#b-sess-checkbox-list").text() == "" ){
+            alert("Не выделено ни одного элемента");
+            return false;
+        }
+
         progress.setColor("#D26A44");
         progress.start(3);
 
@@ -146,7 +170,7 @@ $(document).ready(function(){
 
     function bindFilter(){
         if( $(".main .b-filter").length ){
-            $(".main form select, .main form input").bind("change",function(){
+            $(".main .b-filter").find("select, input").bind("change",function(){
                 var $form = $(this).parents("form");
 
                 progress.setColor("#D26A44");
@@ -162,11 +186,11 @@ $(document).ready(function(){
                     }
                 });    
             });
-            $(".main form select, .main form input").bind("keyup", function(e){
+            $(".main .b-filter").parents("form").find("select, input").bind("keyup", function(e){
                 if( e.keyCode == 13 )
                     $(this).trigger("change");
             });
-            $(".main form").submit(function(){
+            $(".main .b-filter").parents("form").submit(function(){
                 return false;
             });
             $(".b-clear-filter").click(function(){
@@ -175,14 +199,56 @@ $(document).ready(function(){
                 return false;
             });
 
-            $(".b-filter .select2").select2({
-                placeholder: "",
-                allowClear: true
-            });
-
             bindDate($(".main .b-filter").parents("form"));
         }
     }
+
+    function bindTableForm(){
+        $(".select2").select2({
+            placeholder: "",
+            allowClear: true
+        });
+
+        if( $(".b-set-all").length ){
+            $(".b-set-all input, .b-set-all select").prop("required", false);
+
+            bindForm($("form"));
+
+            $(".b-set-all input, .b-set-all select").change(function(){
+                if( $(this).val() == "" ) return true;
+
+                var name = ( $(this).is("select") )?($(this).find("option[value='"+$(this).val()+"']").text()):($(this).val());
+                if (confirm("Задать всем элементам значение \""+name+"\"?")) {
+                    if( $(this).is("select") ){
+                        $("select[data-id='"+$(this).attr("data-id")+"']").select2('data', {id: $(this).val(), text: name});
+                        $("select[data-id='"+$(this).attr("data-id")+"']").val($(this).val());
+                    }else{
+                        $("input[data-id='"+$(this).attr("data-id")+"'], textarea[data-id='"+$(this).attr("data-id")+"']").val($(this).val());
+                    }
+                }else{
+                    $(this).select2('data', {id: "", text: 'Не задано'});
+                    $(this).val("").trigger("change");
+                }
+            });
+        }
+
+        if( $(".b-table-form").length ){
+            $(".b-table-form input, .b-table-form select, .b-table-form textarea").change(function(){
+                window.onbeforeunload = function (evt) {
+                    var message = "Вы действительно хотите покинуть страницу? Возможно, внесенные изменения не сохранятся.";
+                    if (typeof evt == "undefined") {
+                        evt = window.event;
+                    }
+                    if (evt) {
+                        evt.returnValue = message;
+                    }
+                    return message;
+                }
+            });
+        }
+    }
+
+    bindTableForm();
 
     function bindForm($form){
 
@@ -201,6 +267,14 @@ $(document).ready(function(){
         $(".fancybox-skin .select2").select2({
             placeholder: "",
             allowClear: true
+            // createSearchChoice:function(term, data) {
+            //     if ( $(data).filter( function() {
+            //       return this.text.localeCompare(term)===0;
+            //     }).length===0) {
+            //       return {id:term, text:term};
+            //     }
+            //   }
+
         });
 
         $form.validate({
@@ -227,6 +301,8 @@ $(document).ready(function(){
                 }
             });
         }
+
+        bindAutoSum();
 
         $(".numeric").numericInput({ allowFloat: false, allowNegative: true });
         $(".float").numericInput({ allowFloat: true, allowNegative: true });
@@ -310,6 +386,41 @@ $(document).ready(function(){
         });
     }
 
+    function bindAutoSum(){
+        if( $(".b-auto-sum").length && $(".b-auto-price").length && $(".b-auto-cubage").length ){
+            $(".b-auto-price, .b-auto-cubage").change(function(){
+                $(".b-auto-sum").val( $(".b-auto-price").val()*$(".b-auto-cubage").val() );
+            });
+        }
+    }
+
+    function bindBoardForm(){
+        if( $(".b-board-sum").length ){
+            $(".b-popup-form .b-for-new-inputs input:not(.binded)").change(updateBoardForm).addClass("binded");
+
+            updateBoardForm();
+        }
+    }
+
+    function updateBoardForm(){
+        var sum = 0;
+        $(".b-for-new-inputs").children().filter(function() {
+            return $(this).find("input, select, textarea").filter(function(){
+                return $(this).val() != "";
+            }).length;
+        }).each(function(){
+            var row = 1;
+            $(this).find("input, select, textarea").each(function(){
+                row *= ($(this).val()*1);
+                console.log($(this).val());
+            });
+
+            sum += row;
+        });
+
+        $(".b-board-sum b").html(Math.floor(sum*100)/100);
+    }
+
     function bindDate($form){
         if( $form.find(".date").length ){
             $form.find(".date").each(function(){
@@ -351,6 +462,8 @@ $(document).ready(function(){
         }
         $(".b-for-new-inputs .numeric").numericInput({ allowFloat: false, allowNegative: true }).removeClass("numeric");
         $(".b-for-new-inputs .float").numericInput({ allowFloat: true, allowNegative: true }).removeClass("float");
+
+        bindBoardForm();
     }
 
     function removeNewInputs(){
@@ -364,10 +477,10 @@ $(document).ready(function(){
     }
 
     function bindImageUploader(){
-        $(".b-get-image").click(function(){
-            $(".b-for-image-form").load($(this).parents(".b-image-cont").find(".b-get-image").attr("data-path"), {}, function(){
+        $(".b-get-file").click(function(){
+            $(".b-for-image-form").load($(this).attr("href"), {}, function(){
                 $(".upload").addClass("upload-show");
-                $(".b-upload-overlay").addClass("b-upload-overlay-show")
+                $(".b-upload-overlay").addClass("b-upload-overlay-show");
                 $(".plupload_cancel,.b-upload-overlay,.plupload_save").click(function(){
                     $(".b-upload-overlay").removeClass("b-upload-overlay-show");
                     $(".upload").addClass("upload-hide");
@@ -377,8 +490,25 @@ $(document).ready(function(){
                     return false;
                 });
             });
+            return false;
         });
     }
+
+    // function bindUploader(){
+    //     if( $(".b-get-file").length ){
+    //         $(".b-get-file").click(function(){
+    //             $(".upload").addClass("upload-show").removeClass("upload-hide");
+    //             $(".b-upload-overlay").addClass("b-upload-overlay-show");
+    //             return false;
+    //         });
+
+    //         $(".plupload_cancel,.b-upload-overlay,.plupload_save").click(function(){
+    //             $(".b-upload-overlay").removeClass("b-upload-overlay-show");
+    //             $(".upload").addClass("upload-hide");
+    //             return false;
+    //         });
+    //     }
+    // }
 
     /* TinyMCE ------------------------------------- TinyMCE */
     function bindTinymce(){
@@ -421,34 +551,38 @@ $(document).ready(function(){
     /* Preloader ----------------------------------- Preloader */
 
     /* Hot keys ------------------------------------ Hot keys */
-    if( $(".ajax-create").length ){
-        var cmddown = false,
-            ctrldown = false;
-        function down(e){
-            if( e.keyCode == 13 && ( cmddown || ctrldown ) ){
-                if( !$(".b-popup form").length ){
+    var cmddown = false,
+        ctrldown = false;
+    function down(e){
+        if( e.keyCode == 13 && ( cmddown || ctrldown ) ){
+            if( !$(".b-popup form").length ){
+                if( $(".ajax-create").length ){
                     $(".ajax-create").click();
-                }else{
-                    $(".fancybox-wrap form").trigger("submit",[true]);
                 }
+            }else{
+                $(".fancybox-wrap form").trigger("submit",[true]);
             }
-            if( e.keyCode == 13 ){
-                if( $(".fancybox-inner .b-delete-yes").length ){
-                    $(".fancybox-inner .b-delete-yes").trigger("click");
-                }
-                enterVariantsHandler();
+        }
+        if( e.keyCode == 16 ){
+            shift = true;
+        }
+        if( e.keyCode == 13 ){
+            if( $(".fancybox-inner .b-delete-yes").length ){
+                $(".fancybox-inner .b-delete-yes").trigger("click");
             }
-            if( e.keyCode == 91 ) cmddown = true;
-            if( e.keyCode == 17 ) ctrldown = true;
-            if( e.keyCode == 27 && $(".fancybox-wrap").length ) $.fancybox.close();
+            enterVariantsHandler();
         }
-        function up(e){
-            if( e.keyCode == 91 ) cmddown = false;
-            if( e.keyCode == 17 ) ctrldown = false;
-        }
-        $(document).keydown(down);
-        $(document).keyup(up);
+        if( e.keyCode == 91 ) cmddown = true;
+        if( e.keyCode == 17 ) ctrldown = true;
+        if( e.keyCode == 27 && $(".fancybox-wrap").length ) $.fancybox.close();
     }
+    function up(e){
+        if( e.keyCode == 91 ) cmddown = false;
+        if( e.keyCode == 17 ) ctrldown = false;
+        if( e.keyCode == 16 ) shift = false;
+    }
+    $(document).keydown(down);
+    $(document).keyup(up);
     /* Hot keys ------------------------------------ Hot keys */
 
     /* Autocomplete -------------------------------- Autocomplete */
@@ -528,6 +662,48 @@ $(document).ready(function(){
             //             $clone.autocomplete('search');
             //         }
             //     });
+            });
+        }
+    }
+
+    if( $(".b-kit-switcher").length ){
+        $("body").on("click",".b-kit-switcher",function(){
+            toggleMode(!$(this).hasClass("checked"),$(this));
+            return false;
+        });
+        function toggleMode(tog,el){
+            if( tog ){
+                el.addClass("checked");
+                // $(".b-kit-off").removeClass("b-kit-off").addClass("b-kit-on");
+                if( el.attr("data-on") ) customHandlers[el.attr("data-on")](el);
+            }else{
+                el.removeClass("checked");
+                // $(".b-kit-on").removeClass("b-kit-on").addClass("b-kit-off");
+                if( el.attr("data-off") ) customHandlers[el.attr("data-off")](el);
+            }
+        }
+
+        customHandlers["updateDryer"] = function($this){
+            progress.setColor("#D26A44");
+            progress.start(3);
+            var href = $this.attr("data-"+(($this.hasClass("checked"))?"on":"off")+"-href");
+            $.ajax({
+                url: href,
+                success: function(msg){
+                    if( msg != 0 && msg != "0" ){
+                        if( msg == "Работает" ){
+                            $this.parents("tr").find(".on").addClass("green");
+                        }else{
+                            $this.parents("tr").find(".on").removeClass("green");
+                        }
+                        $this.parents("tr").find(".on").text(msg);
+                    }else{
+                        alert("Не удалось переключить состояние сушилки");
+                    }
+                    progress.end(function(){
+                        // $(".b-place-state span[data-id='"+$this.attr("data-id")+"']").removeClass((($this.hasClass("checked"))?"b-yellow":"b-green")).addClass((($this.hasClass("checked"))?"b-green":"b-yellow")); 
+                    });
+                }
             });
         }
     }
@@ -705,6 +881,162 @@ $(document).ready(function(){
         });
     }
     /* Left menu ----------------------------------- Left menu */
+
+    /* Selection ----------------------------------- Selection */
+    var prevCheck = {
+        index : null,
+        checked : null
+    };
+
+    if( $(".b-sess-checkbox").length ){
+        var addUrl = $(".b-sess-checkbox-info").attr("data-add-url"),
+            removeUrl = $(".b-sess-checkbox-info").attr("data-remove-url"),
+            addManyUrl = $(".b-sess-checkbox-info").attr("data-add-many-url"),
+            removeManyUrl = $(".b-sess-checkbox-info").attr("data-remove-many-url");
+
+        $("body").on("click",".b-sess-allcheckbox",function(){
+            var $this = $(this);
+            progress.setColor("#D26A44");
+            progress.start(1);
+
+            $.ajax({
+            url: $this.attr("href"),
+                success: function(msg){
+                    var json = JSON.parse(msg);
+                    progress.end();
+                    if( json.result == "success" ){
+                        if(json.codes) $(".b-sess-checkbox").prop("checked",true); else $(".b-sess-checkbox").prop("checked",false);
+                        $("#b-sess-checkbox-list").text(json.codes);
+                    }else{
+                        alert("Ошибка при выделении");
+                    }
+                },
+                error: function(){
+                    progress.end();
+                    alert("Ошибка при выделении");
+                }
+            });
+            return false;
+        });
+
+        $("body").on("change",".b-sess-checkbox", function(){
+            progress.setColor("#D26A44");
+            progress.start(1);
+
+            if( shift && prevCheck.index !== null && $(this).parents("tr").index() !== prevCheck.index){
+                manyCheckboxes($(this));
+            }else{
+                oneCheckbox($(this));
+            }
+        });
+    }
+    function manyCheckboxes($this){
+        var ids = [],
+            from = Math.min(prevCheck.index, $this.parents("tr").index()),
+            to = Math.max(prevCheck.index, $this.parents("tr").index()),
+            $table = $this.parents("table"),
+            action = prevCheck.checked;
+
+        console.log([from,to]);
+        for (var i = from; i <= to; i++){
+            var input = $table.find("tr").eq(i).find("input[type='checkbox']");
+            ids.push(input.val());
+            input.prop("checked", prevCheck.checked);
+        }
+
+        $.ajax({
+            url: ( prevCheck.checked )?addManyUrl:removeManyUrl,
+            data: "ids="+ids.join(","),
+            success: function(msg){
+                var json = JSON.parse(msg);
+                progress.end();
+
+                $($this.attr("data-block")).text(json.codes);
+                if( json.ids ){
+                    var items = json.ids.split(",");
+                    for( var i in items )
+                        $("#id-"+items[i]).find("input[type='checkbox']").prop("checked", action);
+                }
+            },
+            error: function(){
+                progress.end();
+                alert("Ошибка при выделении");
+            }
+        });
+    }
+
+    function oneCheckbox($this){
+        prevCheck.index = $this.parents("tr").index();
+        prevCheck.checked = $this.prop("checked");
+
+        $.ajax({
+            url: ( $this.prop("checked") )?addUrl:removeUrl,
+            data: "id="+$this.val(),
+            success: function(msg){
+                var json = JSON.parse(msg);
+                progress.end();
+                if( json.result == "success" ){
+                    if($this.hasClass("check-page")) {
+                        if($this.prop("checked")) {
+                            $(".b-sess-checkbox").prop("checked",true);
+                        } else $(".b-sess-checkbox").prop("checked",false);
+                    }
+                    $($this.attr("data-block")).text(json.codes);
+                }else{
+                    alert("Ошибка выделения");
+                }
+            },
+            error: function(){
+                progress.end();
+                alert("Ошибка выделения");
+            }
+        });
+    }
+    /* Selection ----------------------------------- Selection */
+
+    if( $(".b-ajax-update").length ){
+        $(".b-ajax-update").change(function(){
+            var $this = $(this),
+                $form = $this.parents("form"),
+                url = $form.attr("action"),
+                method = $form.attr("method"),
+                data = $form.serialize();
+
+            progress.setColor("#D26A44");
+            progress.start(2);
+
+            $.ajax({
+                url : url,
+                method : method,
+                data : data,
+                success: function(msg){
+                    var json = JSON.parse(msg);
+                    progress.end(function(){});
+                    if( json.result == "error" ){
+                        alert(json.error);
+                    }
+                    $this.val(json.category_id);
+                }
+            });   
+        });
+
+        if( $(".b-with-select2").length ){
+            $(".b-with-select2 .select2").select2({
+                placeholder: "",
+                allowClear: true
+            });   
+        }
+    }
+
+    $("body").on("click",".select-all",function(){
+        $($(this).attr("data-items")).prop("checked", "checked");
+        return false;
+    });
+
+    $("body").on("click",".select-none",function(){
+        $($(this).attr("data-items")).prop("checked", false);
+        return false;
+    });
 
     function transition(el,dur){
         el.css({

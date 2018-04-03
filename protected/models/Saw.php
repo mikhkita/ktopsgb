@@ -45,7 +45,7 @@ class Saw extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			"planks" => array(self::HAS_MANY, "SawPlank", "saw_id"),
-			"workers" => array(self::HAS_MANY, "SawWorker", "saw_id"),
+			"chinese" => array(self::HAS_MANY, "SawChina", "saw_id"),
 		);
 	}
 
@@ -58,7 +58,7 @@ class Saw extends CActiveRecord
 			"id" => "ID",
 			"date" => "Дата",
 			"sawmill_id" => "Пилорама",
-			"workers" => "Рабочие",
+			"chinese" => "Рабочие",
 			"salary" => "Зарплата",
 		);
 	}
@@ -80,7 +80,7 @@ class Saw extends CActiveRecord
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->order = "date DESC";
+		$criteria->order = "date DESC, id DESC";
 
 		$criteria->addSearchCondition("id", $this->id);
 		$criteria->addSearchCondition("date", $this->date);
@@ -96,7 +96,7 @@ class Saw extends CActiveRecord
 		}
 	}
 
-	public function updateObj($attributes, $planks = NULL, $workers = NULL){
+	public function updateObj($attributes, $planks = NULL, $chinese = NULL){
 		foreach ($attributes as &$value) {
 	    	$value = trim($value);
 		}
@@ -118,14 +118,14 @@ class Saw extends CActiveRecord
 				}
 			}
 
-			SawWorker::model()->deleteAll("saw_id=".$this->id);
+			SawChina::model()->deleteAll("saw_id=".$this->id);
 
-			if( is_array($workers) && count($workers) ){
-				foreach ($workers as $key => $workerId) {
-					$worker = new SawWorker();
-					$worker->saw_id = $this->id;
-					$worker->worker_id = $workerId;
-					$worker->save();
+			if( is_array($chinese) && count($chinese) ){
+				foreach ($chinese as $key => $chinaId) {
+					$china = new SawChina();
+					$china->saw_id = $this->id;
+					$china->china_id = $chinaId;
+					$china->save();
 				}
 			}
 
@@ -163,8 +163,8 @@ class Saw extends CActiveRecord
 	public function getWorkerNames(){
 		$out = array();
 
-		foreach ($this->workers as $i => $worker) {
-			$out[$worker->worker->id] = $worker->worker->name;
+		foreach ($this->chinese as $i => $china) {
+			$out[$china->china->id] = $china->china->name;
 		}
 
 		return $out;

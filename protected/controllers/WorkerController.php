@@ -14,11 +14,11 @@ class WorkerController extends Controller
 		return array(
 			array("allow",
 				"actions" => array("adminIndex"),
-				"roles" => array("readSaw"),
+				"roles" => array("readWorker"),
 			),
 			array("allow",
 				"actions" => array("adminUpdate", "adminDelete", "adminCreate"),
-				"roles" => array("updateSaw"),
+				"roles" => array("updateWorker"),
 			),
 			array("deny",
 				"users" => array("*"),
@@ -41,7 +41,6 @@ class WorkerController extends Controller
 
         $dataProvider = $filter->search(50);
 		$count = $filter->search(50, true);
-		$total = $filter->getAllMoney($filter->search(50, false, true));
 
 		$params = array(
 			"data" => $dataProvider->getData(),
@@ -49,8 +48,6 @@ class WorkerController extends Controller
 			"filter" => $filter,
 			"count" => $count,
 			"labels" => Worker::attributeLabels(),
-			"plankGroups" => PlankGroup::model()->findAll(),
-			"total" => $total
 		);
 
 		if( !$partial ){

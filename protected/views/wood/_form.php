@@ -15,45 +15,60 @@
 			<?php echo $form->error($model,"date"); ?>
 		</div>
 		<div class="row-half">
-			<?php echo $form->labelEx($model,"car"); ?>
-			<?php echo $form->textField($model,"car", array("maxlength" => 50, "required" => true)); ?>
-			<?php echo $form->error($model,"car"); ?>
+			<?php echo $form->labelEx($model, "species_id"); ?>
+			<?php echo $form->dropDownList($model, "species_id", CHtml::listData(Species::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
+			<?php echo $form->error($model, "species_id"); ?>
 		</div>
 	</div>
 
 	<div class="row clearfix">
-		<div class="row-half">
+		<div class="row-three">
 			<?php echo $form->labelEx($model,"cubage"); ?>
-			<?php echo $form->textField($model,"cubage", array("maxlength" => 20, "required" => true, "class" => "float")); ?>
+			<?php echo $form->textField($model,"cubage", array("maxlength" => 20, "required" => true, "class" => "float b-auto-cubage")); ?>
 			<?php echo $form->error($model,"cubage"); ?>
 		</div>
-		<div class="row-half">
+		<div class="row-three">
 			<?php echo $form->labelEx($model,"price"); ?>
-			<?php echo $form->textField($model,"price", array("maxlength" => 20, "required" => true, "class" => "float" )); ?>
+			<?php echo $form->textField($model,"price", array("maxlength" => 20, "required" => true, "class" => "float b-auto-price" )); ?>
 			<?php echo $form->error($model,"price"); ?>
+		</div>
+		<div class="row-three">
+			<?php echo $form->labelEx($model,"sum"); ?>
+			<?php echo $form->textField($model,"sum", array("maxlength" => 20, "required" => true, "class" => "float b-auto-sum" )); ?>
+			<?php echo $form->error($model,"sum"); ?>
 		</div>
 	</div>
 
-	<? if( $_GET["payment_id"] == 1 ): ?>
-		<div class="row">
-			<?php echo $form->labelEx($model,"who"); ?>
-			<?php echo $form->textField($model,"who", array("maxlength" => 128 )); ?>
-			<?php echo $form->error($model,"who"); ?>
+	<div class="row clearfix">
+		<div class="row-<?=(( $_GET["payment_id"] == 1 )?"three":"half")?>">
+			<?php echo $form->labelEx($model,"car"); ?>
+			<?php echo $form->textField($model,"car", array("maxlength" => 50, "required" => true)); ?>
+			<?php echo $form->error($model,"car"); ?>
 		</div>
-	<? else: ?>
-		<div class="row clearfix">
+		<? if( $_GET["payment_id"] == 1 ): ?>
+			<div class="row-three">
+				<?php echo $form->labelEx($model, "group_id"); ?>
+				<?php echo $form->dropDownList($model, "group_id", CHtml::listData(WoodGroup::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
+				<?php echo $form->error($model, "group_id"); ?>
+			</div>
+			<div class="row-three">
+				<?php echo $form->labelEx($model,"who"); ?>
+				<?php echo $form->textField($model,"who", array("maxlength" => 128 )); ?>
+				<?php echo $form->error($model,"who"); ?>
+			</div>
+		<? else: ?>
 			<div class="row-half">
 				<?php echo $form->labelEx($model, "provider_id"); ?>
-				<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
+				<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(Correspondent::model()->providers()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
 				<?php echo $form->error($model, "provider_id"); ?>
 			</div>
-			<div class="row-half line-inputs">
-				<?php echo $form->labelEx($model,'paid'); ?>
-				<?php echo $form->radioButtonList($model,'paid', array(1 => "Да", 0 => "Нет"), array("separator"=>"")); ?>
-				<?php echo $form->error($model,'paid'); ?>
-			</div>
-		</div>
-	<? endif; ?>
+				<? /* ?><div class="row-half line-inputs">
+					<?php echo $form->labelEx($model,'paid'); ?>
+					<?php echo $form->radioButtonList($model,'paid', array(1 => "Да", 0 => "Нет"), array("separator"=>"")); ?>
+					<?php echo $form->error($model,'paid'); ?>
+				</div><? */ ?>
+		<? endif; ?>
+	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,"comment"); ?>

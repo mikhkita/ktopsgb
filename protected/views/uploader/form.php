@@ -1,7 +1,35 @@
-<div class="hidden" id="tp_head_text_data"><?=$_GET["title"]?></div>
+<?
+
+if( !isset($extensions) ){
+    $extensions = $_GET['extensions'];
+}
+
+if( !isset($maxFiles) ){
+    $maxFiles = ( (isset($_GET["maxFiles"]) && intval($_GET["maxFiles"]) > 0 && ($_GET["maxFiles"]) < 10000)?$_GET["maxFiles"]:"1");
+}
+
+if( !isset($title) ){
+    $title = $_GET['title'];
+}
+
+if( !isset($selector) ){
+    $selector = $_GET['selector'];
+}
+
+if( !isset($afterLoad) ){
+    $afterLoad = $_GET['afterLoad'];
+}
+
+if( !isset($tmpPath) ){
+    $tmpPath = (isset($_GET['tmpPath']))?$_GET['tmpPath']:NULL;
+}
+
+?>
+
+<div class="hidden" id="tp_head_text_data"><?=$title?></div>
 <!-- <form action="/adv/setAdvImg?id=" method="POST" id="uploader"> -->
     <div class="upload">
-        <h3><?=$_GET["title"]?></h3>
+        <h3><?=$title?></h3>
         <!-- <div class="max-files">Оставшееся количество изображений: <span class="max-files-count" data-count=""></span></div> -->
         <div id="uploaderPj">Ваш браузер не поддерживает Flash.</div>
         <div class="b-save-buttons">
@@ -13,7 +41,7 @@
 <!-- </form> -->
 <script>
 $(function () {
-    var maxfiles = <?=( (isset($_GET["maxFiles"]) && intval($_GET["maxFiles"]) > 0 && ($_GET["maxFiles"]) < 10000)?$_GET["maxFiles"]:"1")?>,
+    var maxfiles = <?=$maxFiles?>,
         error = false;
 
     $("#uploaderPj").pluploadQueue({
@@ -29,7 +57,7 @@ $(function () {
             height: 600
         },
         filters : [
-            {title : "Files", extensions : "<?=$_GET['extensions']?>" }
+            {title : "Files", extensions : "<?=$extensions?>" }
         ],
         init : {
             FilesAdded: function(up, files) {
@@ -55,9 +83,13 @@ $(function () {
                     $(".plupload_filelist .plupload_done").each(function(){
                         tmpArr.push($(this).find("input").eq(0).val());
                     });
-                    $("<?=$_GET['selector']?>").val(<?if(isset($_GET['tmpPath'])):?>"<?=$_GET['tmpPath']?>/"+<?endif;?>tmpArr.join(',')).trigger("change");
+                    $("<?=$selector?>").val(<?if(isset($tmpPath)):?>"<?=$tmpPath?>/"+<?endif;?>tmpArr.join(',')).trigger("change");
                     $(".plupload_save").click();
                     $(".b-save-buttons").fadeIn(300);
+
+                    <?if(isset($afterLoad)):?>
+                        customHandlers["<?=$afterLoad?>"](tmpArr);
+                    <?endif;?>
                 }
             },
             FileUploaded: function(upldr, file, object) {
