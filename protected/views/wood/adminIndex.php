@@ -41,7 +41,7 @@
 	<tr class="b-filter">
 		<td><?php echo CHtml::activeTextField($filter, 'date_from', array('tabindex' => 0, "placeholder" => "От", "class" => "date")); ?><span class="filter-separator">-</span><?php echo CHtml::activeTextField($filter, 'date_to', array('tabindex' => 0, "placeholder" => "До", "class" => "date")); ?></td>
 		<? if($_GET["payment_id"] != 1): ?>
-			<td><?php echo CHtml::activeDropDownList($filter, 'provider_id', CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все поставщики", "tabindex" => 1, "placeholder" => "Поиск по поставщику")); ?></td>
+			<td><?php echo CHtml::activeDropDownList($filter, 'provider_id', CHtml::listData(Correspondent::model()->providers()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все поставщики", "tabindex" => 1, "placeholder" => "Поиск по поставщику")); ?></td>
 		<? endif; ?>
 		<td><?php echo CHtml::activeDropDownList($filter, 'species_id', CHtml::listData(Species::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Любая порода", "tabindex" => 1, "placeholder" => "Поиск по породе")); ?></td>
 		<td></td>

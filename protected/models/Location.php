@@ -125,7 +125,7 @@ class Location extends CActiveRecord
 	public function afterFind(){
 		parent::afterFind();
 
-		$this->date = date("d.m.Y H:i:s", strtotime($this->date));
+		$this->date = date("d.m.Y H:i", strtotime($this->date));
 	}
 
 	/**

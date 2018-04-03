@@ -1,16 +1,18 @@
 <?php
 
 /**
- * This is the model class for table "correspondent".
+ * This is the model class for table "wood_provider".
  *
- * The followings are the available columns in table "correspondent":
+ * The followings are the available columns in table "wood_provider":
  * @property string $id
  * @property string $name
- * @property string $inn
- * @property integer $is_provider
  */
 class Correspondent extends CActiveRecord
 {
+	public $sumWoods = 0;
+	public $sumOrders = 0;
+	public $sumTotal = 0;
+
 	/**
 	 * @return string the associated database table name
 	 */
@@ -18,6 +20,16 @@ class Correspondent extends CActiveRecord
 	{
 		return "correspondent";
 	}
+
+	public function scopes()
+    {
+        return array(
+            "providers" => array(
+                "order" => "t.name ASC",
+                "condition" => "is_provider = '1' AND active = '1'"
+            ),
+        );
+    }
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -28,12 +40,12 @@ class Correspondent extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			array("name", "required"),
-			array("provider_id", "numerical", "integerOnly" => true),
-			array("name", "length", "max" => 256),
-			array("inn", "length", "max" => 12),
+			array("is_provider, active", "numerical", "integerOnly"=>true),
+			array("name", "length", "max"=>256),
+			array("inn", "length", "max"=>12),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, name, inn, provider_id", "safe", "on" => "search"),
+			array("id, inn, name, is_provider, active", "safe", "on"=>"search"),
 		);
 	}
 
@@ -45,8 +57,8 @@ class Correspondent extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			"provider" =>  array(self::BELONGS_TO, "WoodProvider", "provider_id"),
-			"orders" => array(self::HAS_MANY, "Order", "correspondent_id"),
+			"woods" => array(self::HAS_MANY, "Wood", "provider_id"),
+			"orders" => array(self::HAS_MANY, "Order", "correspondent_id", "on" => "is_new = 0"),
 		);
 	}
 
@@ -58,8 +70,9 @@ class Correspondent extends CActiveRecord
 		return array(
 			"id" => "ID",
 			"name" => "Наименование",
+			"active" => "Активно",
 			"inn" => "ИНН",
-			"provider_id" => "Поставщик",
+			"is_provider" => "Поставщик",
 		);
 	}
 
@@ -80,11 +93,12 @@ class Correspondent extends CActiveRecord
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->order = "name ASC";
+		$criteria->order = "is_provider DESC, name ASC";
 
-		$criteria->compare("id", $this->id, true);
+		$criteria->compare("id", $this->id);
+		$criteria->compare("active", 1);
+		$criteria->compare("is_provider", $this->is_provider);
 		$criteria->addSearchCondition("name", $this->name);
-		$criteria->addSearchCondition("inn", $this->inn);
 
 		if( $count ){
 			return Correspondent::model()->count($criteria);
@@ -129,6 +143,33 @@ class Correspondent extends CActiveRecord
 		$model = Correspondent::model()->findAll("inn IN (".implode(",", $tmpArr).")");
 
 		return Controller::getAssoc( $model, "inn" );
+	}
+
+	public function sumTotal(){
+		$this->sumTotal = (-1)*($this->sumWoods() - $this->sumOrders());
+		return $this->sumTotal;
+	}
+
+	public function sumWoods(){
+		$sum = 0;
+		foreach ($this->woods as $key => $wood) {
+			$sum += $wood->sum;
+		}
+		$this->sumWoods = $sum;
+		return $sum;
+	}
+
+	public function sumOrders(){
+		$sum = 0;
+		foreach ($this->orders as $key => $order) {
+			if( $order->negative ){
+				$sum += $order->sum;
+			}else{
+				$sum -= $order->sum;
+			}
+		}
+		$this->sumOrders = $sum;
+		return $sum;
 	}
 
 	/**

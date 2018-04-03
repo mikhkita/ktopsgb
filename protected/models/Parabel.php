@@ -75,7 +75,7 @@ class Parabel extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false)
+	public function search($pages, $count = false, $returnCriteria = false)
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
@@ -94,7 +94,9 @@ class Parabel extends CActiveRecord
 		$criteria->compare("date", $this->date, true);
 		$criteria->compare("type_id", $this->type_id, true);
 
-		if( $count ){
+		if( $returnCriteria ){
+			return $criteria;
+		}else if( $count ){
 			return Parabel::model()->count($criteria);
 		}else{
 			return new CActiveDataProvider($this, array(
@@ -102,6 +104,19 @@ class Parabel extends CActiveRecord
 				"pagination" => array('pageSize' => $pages, 'route' => 'parabel/adminindex')
 			));
 		}
+	}
+
+	public function getTotal($criteria){
+		$parabel = Parabel::model()->findAll($criteria);
+
+		$cubage = 0;
+		foreach ($parabel as $i => $item) {
+			foreach ($item->cargo as $j => $cargo) {
+				$cubage += $cargo->cubage;
+			}
+		}
+
+		return $cubage;
 	}
 
 	public function updateObj($attributes, $providers){

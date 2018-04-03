@@ -14,11 +14,11 @@ class CorrespondentController extends Controller
 		return array(
 			array("allow",
 				"actions" => array("adminIndex"),
-				"roles" => array("readOrder"),
+				"roles" => array("readCorr"),
 			),
 			array("allow",
 				"actions" => array("adminUpdate", "adminDelete", "adminCreate"),
-				"roles" => array("updateOrder"),
+				"roles" => array("updateCorr"),
 			),
 			array("deny",
 				"users" => array("*"),
@@ -35,24 +35,31 @@ class CorrespondentController extends Controller
 
         $filter = new Correspondent('filter');
 
+        $filter->is_provider = NULL;
+
 		if (isset($_GET['Correspondent'])){
             $filter->attributes = $_GET['Correspondent'];
         }
 
         $dataProvider = $filter->search(50);
 		$count = $filter->search(50, true);
-		$params = array(
-			"data" => $dataProvider->getData(),
-			"pages" => $dataProvider->getPagination(),
-			"filter" => $filter,
-			"count" => $count,
-			"labels" => Correspondent::attributeLabels(),
-		);
 
 		if( !$partial ){
-			$this->render("adminIndex", $params);
+			$this->render("adminIndex",array(
+				"data" => $dataProvider->getData(),
+				"pages" => $dataProvider->getPagination(),
+				"filter" => $filter,
+				"count" => $count,
+				"labels" => Correspondent::attributeLabels(),
+			));
 		}else{
-			$this->renderPartial("adminIndex", $params);
+			$this->renderPartial("adminIndex",array(
+				"data" => $dataProvider->getData(),
+				"pages" => $dataProvider->getPagination(),
+				"filter" => $filter,
+				"count" => $count,
+				"labels" => Correspondent::attributeLabels(),
+			));
 		}
 	}
 
@@ -90,7 +97,9 @@ class CorrespondentController extends Controller
 
 	public function actionAdminDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$model = $this->loadModel($id);
+		$model->active = 0;
+		$model->save();
 
 		$this->actionAdminindex(true);
 	}

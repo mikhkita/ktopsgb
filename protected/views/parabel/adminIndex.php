@@ -60,4 +60,10 @@
         'nextPageLabel' => 'далее >'
     )) ?>
     <div class="b-lot-count">Всего отгрузок: <?=$parabelCount?></div>
+    <div class="b-total right">
+		<div class="b-total-row">
+			<span class="b-total-name">Итого кубов: </span>
+			<span class="b-total-bold"><?=number_format( $total, 2, '.', '&nbsp;' )?></span>
+		</div>
+	</div>
 </div>

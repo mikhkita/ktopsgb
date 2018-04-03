@@ -96,7 +96,11 @@ class Order extends CActiveRecord
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
-		$criteria->order = "date DESC";
+		if( $model == "Order" ){
+			$criteria->order = "date DESC";
+		}else{
+			$criteria->order = "id ASC";
+		}
 
 		if( $this->date_from != NULL && $this->date_from != "__.__.____" ){
 			$criteria->addCondition("date >= '".date("Y-m-d H:i:s", strtotime($this->date_from))."'");

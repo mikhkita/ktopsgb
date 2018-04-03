@@ -59,7 +59,7 @@
 		<? else: ?>
 			<div class="row-half">
 				<?php echo $form->labelEx($model, "provider_id"); ?>
-				<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
+				<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(Correspondent::model()->providers()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано", "required" => true)); ?>
 				<?php echo $form->error($model, "provider_id"); ?>
 			</div>
 				<? /* ?><div class="row-half line-inputs">

@@ -274,6 +274,10 @@ class SiteController extends Controller
         $auth->createOperation("readReloc", "Просмотр раздела перекладок");
         $auth->createOperation("updateReloc", "Создание/изменение/удаление перекладок");
 
+        // Корреспонденты
+        $auth->createOperation("readCorr", "Просмотр корреспондентов");
+        $auth->createOperation("updateCorr", "Создание/изменение/удаление корреспондентов");
+
         // $bizRule = 'return $params["type_id"] == 2;';
         // $task = $auth->createTask("updateFinCash", "Создание/изменение/удаление платежей в разделе финансов", $bizRule);
         // $task->addChild("updateCash");
@@ -332,8 +336,14 @@ class SiteController extends Controller
         $role->addChild("readCash");
         $role->addChild("updateCash");
 
+        // Управляющий корреспондентами
+        $role = $auth->createRole("corrManager");
+        $role->addChild("readCorr");
+        $role->addChild("updateCorr");
+
         // Управляющий отгрузками
         $role = $auth->createRole("woodManager");
+        $role->addChild("corrManager");
         $role->addChild("readWood");
         $role->addChild("updateWood");
 
@@ -374,6 +384,7 @@ class SiteController extends Controller
 
         // Управляющий платежными поручениями
         $role = $auth->createRole("orderManager");
+        $role->addChild("corrManager");
         $role->addChild("readOrder");
         $role->addChild("updateOrder");
 

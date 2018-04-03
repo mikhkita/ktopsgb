@@ -63,7 +63,7 @@ class Cargo extends CActiveRecord
 			"id" => "ID",
 			"type_id" => "Тип груза",
 			"length" => "Длина",
-			"thickness" => "Ширина",
+			"thickness" => "Толщина",
 			"cubage" => "Кубатура",
 			"count" => "Количество пачек",
 			"price" => "Цена за куб",

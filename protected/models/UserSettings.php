@@ -1,30 +1,22 @@
 <?php
 
 /**
- * This is the model class for table "category".
+ * This is the model class for table "user_settings".
  *
- * The followings are the available columns in table "category":
- * @property integer $id
- * @property string $name
+ * The followings are the available columns in table 'user_settings':
+ * @property string $user_id
+ * @property string $code
+ * @property string $value
  */
-class Category extends CActiveRecord
+class UserSettings extends CActiveRecord
 {
 	/**
 	 * @return string the associated database table name
 	 */
 	public function tableName()
 	{
-		return "category";
+		return 'user_settings';
 	}
-
-	public function scopes()
-    {
-        return array(
-            "active" => array(
-                "condition" => "active = '1'"
-            ),
-        );
-    }
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -34,12 +26,13 @@ class Category extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("name", "required"),
-			array("name", "length", "max" => 64),
-			array("active", "numerical", "integerOnly"=>true),
+			array('user_id, code, value', 'required'),
+			array('user_id', 'length', 'max'=>10),
+			array('code', 'length', 'max'=>20),
+			array('value', 'length', 'max'=>1000),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, name, active", "safe", "on" => "search"),
+			array('user_id, code, value', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -51,7 +44,7 @@ class Category extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			"orders" => array(self::HAS_MANY, "Order", "category_id"),
+			'user' => array(self::BELONGS_TO, 'User', 'user_id'),
 		);
 	}
 
@@ -61,8 +54,9 @@ class Category extends CActiveRecord
 	public function attributeLabels()
 	{
 		return array(
-			"id" => "ID",
-			"name" => "Наименование",
+			'user_id' => 'Пользователь',
+			'code' => 'Код',
+			'value' => 'Значение',
 		);
 	}
 
@@ -78,46 +72,26 @@ class Category extends CActiveRecord
 	 * @return CActiveDataProvider the data provider that can return the models
 	 * based on the search/filter conditions.
 	 */
-	public function search($pages, $count = false)
+	public function search()
 	{
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
 
-		$criteria->compare("id", $this->id);
-		$criteria->compare("active", 1);
-		$criteria->addSearchCondition("name", $this->name);
+		$criteria->compare('user_id',$this->user_id,true);
+		$criteria->compare('code',$this->code,true);
+		$criteria->compare('value',$this->value,true);
 
-		if( $count ){
-			return Category::model()->count($criteria);
-		}else{
-			return new CActiveDataProvider($this, array(
-				"criteria" => $criteria,
-				"pagination" => array("pageSize" => $pages, "route" => "category/adminindex")
-			));
-		}
-	}
-
-	public function updateObj($attributes){
-		foreach ($attributes as &$value) {
-	    	$value = trim($value);
-		}
-
-		$this->attributes = $attributes;
-
-		if($this->save()){
-			return true;
-		}else{
-			print_r($this->getErrors());
-			return false;
-		}
+		return new CActiveDataProvider($this, array(
+			'criteria'=>$criteria,
+		));
 	}
 
 	/**
 	 * Returns the static model of the specified AR class.
 	 * Please note that you should have this exact method in all your CActiveRecord descendants!
 	 * @param string $className active record class name.
-	 * @return Category the static model class
+	 * @return UserSettings the static model class
 	 */
 	public static function model($className=__CLASS__)
 	{

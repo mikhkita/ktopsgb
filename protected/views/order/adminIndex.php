@@ -48,7 +48,7 @@
 		<td></td>
 		<td></td>
 		<td></td>
-		<td><?php echo CHtml::activeDropDownList($filter, 'category_id', CHtml::listData(Category::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все категории", "tabindex" => 1, "placeholder" => "Поиск по категории")); ?></td>
+		<td><?php echo CHtml::activeDropDownList($filter, 'category_id', CHtml::listData(Category::model()->active()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Все категории", "tabindex" => 1, "placeholder" => "Поиск по категории")); ?></td>
 		<td><a href="#" class="b-clear-filter">Сбросить</a></td>
 	</tr>
 	<? if(count($data)): ?>
@@ -58,7 +58,7 @@
 				<td><?=$item->number?></td>
 				<td><?=$item->correspondent->name?></td>
 				<td><?=$item->purpose?></td>
-				<td class="tr <?=(($item->negative)?"red":"green")?>"><?=(($item->negative)?"-":"+")?><?=number_format( $item->sum, 0, ',', '&nbsp;' )?></td>
+				<td class="tr <?=(($item->negative)?"red":"green")?>"><?=(($item->negative)?"-":"+")?><?=number_format( $item->sum, 2, ',', '&nbsp;' )?></td>
 				<td><?=$item->category->name?></td>
 				<td>
 					<? if( Yii::app()->user->checkAccess('updateOrder') ): ?><a href="<?php echo Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminupdate',array('id'=>$item->id, "company_id" => $_GET["company_id"]))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать <?=$this->adminMenu["cur"]->vin_name?>"></a>

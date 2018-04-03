@@ -19,10 +19,10 @@
 			<?php echo $form->textField($model, "inn", array("maxlength" => 12, "class" => "numeric")); ?>
 			<?php echo $form->error($model, "inn"); ?>
 		</div>
-		<div class="row-half">
-			<?php echo $form->labelEx($model, "provider_id"); ?>
-			<?php echo $form->dropDownList($model, "provider_id", CHtml::listData(WoodProvider::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не задано")); ?>
-			<?php echo $form->error($model, "provider_id"); ?>
+		<div class="row-half line-inputs">
+			<?php echo $form->labelEx($model,'is_provider'); ?>
+			<?php echo $form->radioButtonList($model,'is_provider', array(0 => "Нет", 1 => "Да"), array("separator"=>"", "class" => "autofirst")); ?>
+			<?php echo $form->error($model,'is_provider'); ?>
 		</div>
 	</div>
 

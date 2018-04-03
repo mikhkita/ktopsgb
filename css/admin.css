@@ -76,6 +76,10 @@ table tr:nth-child(2n+1){
 table tr td:last-child{
     text-align: center;
 }
+table.b-table-form tr td:last-child,
+table.b-sess-checkbox-info tr td:last-child{
+    text-align: left;
+}
 input[type="text"], input[type="password"]
 {
     font-size: 14px;
@@ -322,7 +326,7 @@ h2{
                 background-color: #301A0D;
                 cursor: pointer;
             }
-            .active a{
+            .active>a{
                 background-color: #D26A44 !important;
             }
             a.opened{
@@ -423,7 +427,8 @@ h1.b-with-nav{
         /*background-color: transparent !important;*/
     }
     .b-table tr.b-filter>td,
-    .b-table tr.b-header>th{
+    .b-table tr.b-header>th,
+    .b-table tr.b-set-all>td{
         position: relative;
         background-color: #452716;
         padding: 3px 1px;
@@ -617,13 +622,15 @@ h1.b-with-nav{
         margin-bottom: 15px;
     }
     .checkbox-row input[type="checkbox"]{
-        float: left;
+        /*float: left;*/
         width: auto;
         margin-left: 10px;
         margin-top: 4px;
+        display: inline-block;
     }
     .checkbox-row label{
-        float: left;
+        /*float: left;*/
+        padding-left: 0 !important;
         display: inline-block !important;
     }
         .fancybox-skin span.required{
@@ -662,12 +669,12 @@ h1.b-with-nav{
         .fancybox-skin input[type="checkbox"]{
             cursor: pointer;
         }
-        .fancybox-skin input[type="text"],
-        .fancybox-skin input[type="number"],
-        .fancybox-skin input[type="submit"],
-        .fancybox-skin input[type="button"],
-        .fancybox-skin input[type="password"],
-        .fancybox-skin select{
+        input[type="text"],
+        input[type="number"],
+        input[type="submit"],
+        input[type="button"],
+        input[type="password"],
+        select{
             border-radius: 5px;
             background-color: #FFF5D1;
             border: 1px solid #452716;
@@ -692,7 +699,7 @@ h1.b-with-nav{
             min-height: 101px;
         }
         .fancybox-skin .select2-choices, .fancybox-skin .select2-choice,
-        .b-filter .select2-choices, .b-filter .select2-choice,
+        .select2-container .select2-choices, .select2-container .select2-choice,
         form.b-with-select2 .select2-choices, form.b-with-select2 .select2-choice{
             border-radius: 5px;
             background: #FFF5D1;
@@ -704,7 +711,7 @@ h1.b-with-nav{
             text-align: left;
         }
         .fancybox-skin .select2-choices,
-        .b-filter .select2-choices,
+        .select2-container .select2-choices,
         form.b-with-select2 .select2-choices {
             padding: 1px 0 1px;
             max-width: 452px;
@@ -726,12 +733,14 @@ h1.b-with-nav{
         .fancybox-skin .texts-textarea{
             /*width: 800px;*/
         }
-    .fancybox-skin .buttons{
-        text-align: center;
+    .buttons{
+        text-align: center !important;
         margin-top: 15px;
     }
-        .fancybox-skin .buttons input[type='submit'],
-        .fancybox-skin .buttons input[type='button']{
+        .buttons input[type='submit'],
+        .buttons input[type='button'],
+        .buttons .button{
+            border-radius: 5px;
             border: 0px;
             cursor: pointer;
             background-color: #452716;
@@ -745,21 +754,22 @@ h1.b-with-nav{
             width: auto;
             min-width: 106px;
         }
-        .fancybox-skin .buttons input[type='button']{
+        .buttons input[type='button']{
             margin: 0px 0px 0px 10px;
         }
         .fancybox-skin .b-popup-delete input[type='button']{
             width: 100px;
         }
-            .fancybox-skin .buttons input[type='submit']:hover,
-            .fancybox-skin .buttons input[type='button']:hover{
+            .buttons input[type='submit']:hover,
+            .buttons input[type='button']:hover,
+            .buttons .button:hover{
                 background-color: #D26A44;
             }
-        .fancybox-skin .buttons .blocked{
+        .buttons .blocked{
             background-color: #ABABAB !important;
             color: #DADADA !important;
         }
-            .fancybox-skin .buttons .blocked:hover{
+            .buttons .blocked:hover{
                 cursor: default !important;
                 background-color: #ABABAB !important;
                 color: #DADADA !important;
@@ -769,6 +779,10 @@ h1.b-with-nav{
                 right: 5px;
                 top: 0px;
                 color: #D26A44;
+            }
+            .b-table-form label.error{
+                position: relative;
+                right: auto;
             }
             .without-error-labels input.error{
                 border-color: #D26A44;
@@ -800,6 +814,10 @@ h1.b-with-nav{
             }
                 .row label{
                     cursor: pointer;
+                    text-overflow: ellipsis;
+                    height: 19px;
+                    overflow: hidden;
+                    white-space: nowrap;
                 }
                 .b-full-width .row input,
                 .b-full-width .row select,
@@ -1047,6 +1065,37 @@ h1.b-with-nav{
             background-repeat: no-repeat;
             background-size: 8px;
         }
+.b-group-popup .form{
+    text-align: center;
+} 
+    .b-group-popup form{
+        display: inline-block;
+    }
+.b-group-vars{
+    text-align: left;
+    display: table;
+    margin-top: 20px;
+}
+    .b-group-col{
+        display: table-cell;  
+        padding-right: 20px;
+    }
+        .b-group-vars input{
+            display: inline-block;
+        }
+        .b-group-vars label{
+            display: inline-block;
+            margin-left: 10px;
+        }
+.b-checkbox-nav{
+    text-align: left;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+    .b-checkbox-nav a{
+        margin-right: 20px;
+        font-size: 14px;
+    }
 .b-tool-cont{
     font-size: 0px;
 }
@@ -1055,7 +1104,7 @@ h1.b-with-nav{
         height: 23px;
         display: inline-block;
         vertical-align: middle;
-        margin: 0px 3px 0px;
+        margin: 0px 0px 0px;
         background-size: 23px;
         background-position: 50%;
         background-repeat: no-repeat;
@@ -1066,6 +1115,14 @@ h1.b-with-nav{
         }
     .b-tool-update{
         background-image: url("../images/update.png");
+    }
+    .b-tool-uncheck{
+        background-image: url("../i/multiply.svg");   
+        background-size: 16px;
+    }
+    .b-tool-settings{
+        background-image: url("../images/settings.png");   
+        /*background-size: 16px;*/
     }
     .b-tool-location{
         background-image: url("../i/location.svg");
@@ -2201,6 +2258,10 @@ ul.yiiPager .first, ul.yiiPager .last{
         td.ui-datepicker-today{
             background: #452716;
         }
+        td.ui-datepicker-current-day{
+            background: #D26A44;
+            color: #F5E9BC;
+        }
             .ui-datepicker td.ui-datepicker-today a{
                 color: #F5E9BC;
             }
@@ -2229,7 +2290,7 @@ ul.yiiPager .first, ul.yiiPager .last{
         color: #F5E9BC;
         padding: 0px 5px;
     }
-.fancybox-skin .buttons input[type='button'].add-new-inputs{
+.buttons input[type='button'].add-new-inputs{
     margin-left: 0px;
 }
 .b-kit-switcher {

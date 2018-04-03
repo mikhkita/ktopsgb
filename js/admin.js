@@ -4,7 +4,8 @@ $(document).ready(function(){
         myHeight,
         title = window.location.href,
         titleVar = ( title.split("localhost").length > 1 )?4:3,
-        progress = new KitProgress("#FFF",2);
+        progress = new KitProgress("#FFF",2),
+        shift = false;
 
     progress.endDuration = 0.3;
 
@@ -87,6 +88,13 @@ $(document).ready(function(){
         }
     });
 
+    $("body").on("click", ".require-checkbox", function(){
+        if( $("#b-sess-checkbox-list").text() == "" ){
+            alert("Не выделено ни одного элемента");
+            return false;
+        }
+    });
+
     $(document).on("click",".ajax-delete", function(){
         $.fancybox.open({
             padding: 0,
@@ -99,9 +107,12 @@ $(document).ready(function(){
     function setResult(html){
         $(".b-main-center").html(html);
 
+        window.onbeforeunload = null;
+
         setTimeout(function(){
             bindFilter();
             bindTooltip();
+            bindTableForm();
             bindImageUploader();
             bindAutocomplete();
         },100);
@@ -132,6 +143,11 @@ $(document).ready(function(){
     }
 
     $("body").on("click", ".ajax-action", function(){
+        if( $(this).hasClass("require-checkbox") && $("#b-sess-checkbox-list").text() == "" ){
+            alert("Не выделено ни одного элемента");
+            return false;
+        }
+
         progress.setColor("#D26A44");
         progress.start(3);
 
@@ -154,7 +170,7 @@ $(document).ready(function(){
 
     function bindFilter(){
         if( $(".main .b-filter").length ){
-            $(".main .b-filter").parents("form").find("select, input").bind("change",function(){
+            $(".main .b-filter").find("select, input").bind("change",function(){
                 var $form = $(this).parents("form");
 
                 progress.setColor("#D26A44");
@@ -183,14 +199,56 @@ $(document).ready(function(){
                 return false;
             });
 
-            $(".b-filter .select2").select2({
-                placeholder: "",
-                allowClear: true
-            });
-
             bindDate($(".main .b-filter").parents("form"));
         }
     }
+
+    function bindTableForm(){
+        $(".select2").select2({
+            placeholder: "",
+            allowClear: true
+        });
+
+        if( $(".b-set-all").length ){
+            $(".b-set-all input, .b-set-all select").prop("required", false);
+
+            bindForm($("form"));
+
+            $(".b-set-all input, .b-set-all select").change(function(){
+                if( $(this).val() == "" ) return true;
+
+                var name = ( $(this).is("select") )?($(this).find("option[value='"+$(this).val()+"']").text()):($(this).val());
+                if (confirm("Задать всем элементам значение \""+name+"\"?")) {
+                    if( $(this).is("select") ){
+                        $("select[data-id='"+$(this).attr("data-id")+"']").select2('data', {id: $(this).val(), text: name});
+                        $("select[data-id='"+$(this).attr("data-id")+"']").val($(this).val());
+                    }else{
+                        $("input[data-id='"+$(this).attr("data-id")+"'], textarea[data-id='"+$(this).attr("data-id")+"']").val($(this).val());
+                    }
+                }else{
+                    $(this).select2('data', {id: "", text: 'Не задано'});
+                    $(this).val("").trigger("change");
+                }
+            });
+        }
+
+        if( $(".b-table-form").length ){
+            $(".b-table-form input, .b-table-form select, .b-table-form textarea").change(function(){
+                window.onbeforeunload = function (evt) {
+                    var message = "Вы действительно хотите покинуть страницу? Возможно, внесенные изменения не сохранятся.";
+                    if (typeof evt == "undefined") {
+                        evt = window.event;
+                    }
+                    if (evt) {
+                        evt.returnValue = message;
+                    }
+                    return message;
+                }
+            });
+        }
+    }
+
+    bindTableForm();
 
     function bindForm($form){
 
@@ -209,6 +267,14 @@ $(document).ready(function(){
         $(".fancybox-skin .select2").select2({
             placeholder: "",
             allowClear: true
+            // createSearchChoice:function(term, data) {
+            //     if ( $(data).filter( function() {
+            //       return this.text.localeCompare(term)===0;
+            //     }).length===0) {
+            //       return {id:term, text:term};
+            //     }
+            //   }
+
         });
 
         $form.validate({
@@ -485,34 +551,38 @@ $(document).ready(function(){
     /* Preloader ----------------------------------- Preloader */
 
     /* Hot keys ------------------------------------ Hot keys */
-    if( $(".ajax-create").length ){
-        var cmddown = false,
-            ctrldown = false;
-        function down(e){
-            if( e.keyCode == 13 && ( cmddown || ctrldown ) ){
-                if( !$(".b-popup form").length ){
+    var cmddown = false,
+        ctrldown = false;
+    function down(e){
+        if( e.keyCode == 13 && ( cmddown || ctrldown ) ){
+            if( !$(".b-popup form").length ){
+                if( $(".ajax-create").length ){
                     $(".ajax-create").click();
-                }else{
-                    $(".fancybox-wrap form").trigger("submit",[true]);
                 }
+            }else{
+                $(".fancybox-wrap form").trigger("submit",[true]);
             }
-            if( e.keyCode == 13 ){
-                if( $(".fancybox-inner .b-delete-yes").length ){
-                    $(".fancybox-inner .b-delete-yes").trigger("click");
-                }
-                enterVariantsHandler();
+        }
+        if( e.keyCode == 16 ){
+            shift = true;
+        }
+        if( e.keyCode == 13 ){
+            if( $(".fancybox-inner .b-delete-yes").length ){
+                $(".fancybox-inner .b-delete-yes").trigger("click");
             }
-            if( e.keyCode == 91 ) cmddown = true;
-            if( e.keyCode == 17 ) ctrldown = true;
-            if( e.keyCode == 27 && $(".fancybox-wrap").length ) $.fancybox.close();
+            enterVariantsHandler();
         }
-        function up(e){
-            if( e.keyCode == 91 ) cmddown = false;
-            if( e.keyCode == 17 ) ctrldown = false;
-        }
-        $(document).keydown(down);
-        $(document).keyup(up);
+        if( e.keyCode == 91 ) cmddown = true;
+        if( e.keyCode == 17 ) ctrldown = true;
+        if( e.keyCode == 27 && $(".fancybox-wrap").length ) $.fancybox.close();
     }
+    function up(e){
+        if( e.keyCode == 91 ) cmddown = false;
+        if( e.keyCode == 17 ) ctrldown = false;
+        if( e.keyCode == 16 ) shift = false;
+    }
+    $(document).keydown(down);
+    $(document).keyup(up);
     /* Hot keys ------------------------------------ Hot keys */
 
     /* Autocomplete -------------------------------- Autocomplete */
@@ -812,6 +882,118 @@ $(document).ready(function(){
     }
     /* Left menu ----------------------------------- Left menu */
 
+    /* Selection ----------------------------------- Selection */
+    var prevCheck = {
+        index : null,
+        checked : null
+    };
+
+    if( $(".b-sess-checkbox").length ){
+        var addUrl = $(".b-sess-checkbox-info").attr("data-add-url"),
+            removeUrl = $(".b-sess-checkbox-info").attr("data-remove-url"),
+            addManyUrl = $(".b-sess-checkbox-info").attr("data-add-many-url"),
+            removeManyUrl = $(".b-sess-checkbox-info").attr("data-remove-many-url");
+
+        $("body").on("click",".b-sess-allcheckbox",function(){
+            var $this = $(this);
+            progress.setColor("#D26A44");
+            progress.start(1);
+
+            $.ajax({
+            url: $this.attr("href"),
+                success: function(msg){
+                    var json = JSON.parse(msg);
+                    progress.end();
+                    if( json.result == "success" ){
+                        if(json.codes) $(".b-sess-checkbox").prop("checked",true); else $(".b-sess-checkbox").prop("checked",false);
+                        $("#b-sess-checkbox-list").text(json.codes);
+                    }else{
+                        alert("Ошибка при выделении");
+                    }
+                },
+                error: function(){
+                    progress.end();
+                    alert("Ошибка при выделении");
+                }
+            });
+            return false;
+        });
+
+        $("body").on("change",".b-sess-checkbox", function(){
+            progress.setColor("#D26A44");
+            progress.start(1);
+
+            if( shift && prevCheck.index !== null && $(this).parents("tr").index() !== prevCheck.index){
+                manyCheckboxes($(this));
+            }else{
+                oneCheckbox($(this));
+            }
+        });
+    }
+    function manyCheckboxes($this){
+        var ids = [],
+            from = Math.min(prevCheck.index, $this.parents("tr").index()),
+            to = Math.max(prevCheck.index, $this.parents("tr").index()),
+            $table = $this.parents("table"),
+            action = prevCheck.checked;
+
+        console.log([from,to]);
+        for (var i = from; i <= to; i++){
+            var input = $table.find("tr").eq(i).find("input[type='checkbox']");
+            ids.push(input.val());
+            input.prop("checked", prevCheck.checked);
+        }
+
+        $.ajax({
+            url: ( prevCheck.checked )?addManyUrl:removeManyUrl,
+            data: "ids="+ids.join(","),
+            success: function(msg){
+                var json = JSON.parse(msg);
+                progress.end();
+
+                $($this.attr("data-block")).text(json.codes);
+                if( json.ids ){
+                    var items = json.ids.split(",");
+                    for( var i in items )
+                        $("#id-"+items[i]).find("input[type='checkbox']").prop("checked", action);
+                }
+            },
+            error: function(){
+                progress.end();
+                alert("Ошибка при выделении");
+            }
+        });
+    }
+
+    function oneCheckbox($this){
+        prevCheck.index = $this.parents("tr").index();
+        prevCheck.checked = $this.prop("checked");
+
+        $.ajax({
+            url: ( $this.prop("checked") )?addUrl:removeUrl,
+            data: "id="+$this.val(),
+            success: function(msg){
+                var json = JSON.parse(msg);
+                progress.end();
+                if( json.result == "success" ){
+                    if($this.hasClass("check-page")) {
+                        if($this.prop("checked")) {
+                            $(".b-sess-checkbox").prop("checked",true);
+                        } else $(".b-sess-checkbox").prop("checked",false);
+                    }
+                    $($this.attr("data-block")).text(json.codes);
+                }else{
+                    alert("Ошибка выделения");
+                }
+            },
+            error: function(){
+                progress.end();
+                alert("Ошибка выделения");
+            }
+        });
+    }
+    /* Selection ----------------------------------- Selection */
+
     if( $(".b-ajax-update").length ){
         $(".b-ajax-update").change(function(){
             var $this = $(this),
@@ -845,6 +1027,16 @@ $(document).ready(function(){
             });   
         }
     }
+
+    $("body").on("click",".select-all",function(){
+        $($(this).attr("data-items")).prop("checked", "checked");
+        return false;
+    });
+
+    $("body").on("click",".select-none",function(){
+        $($(this).attr("data-items")).prop("checked", false);
+        return false;
+    });
 
     function transition(el,dur){
         el.css({

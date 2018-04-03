@@ -91,7 +91,9 @@ class CategoryController extends Controller
 
 	public function actionAdminDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		$model = $this->loadModel($id);
+		$model->active = 0;
+		$model->save();
 
 		$this->actionAdminindex(true);
 	}

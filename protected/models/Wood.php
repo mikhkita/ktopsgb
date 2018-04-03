@@ -57,7 +57,7 @@ class Wood extends CActiveRecord
 		return array(
 			"payment" => array(self::BELONGS_TO, "Payment", "payment_id"),
 			"species" => array(self::BELONGS_TO, "Species", "species_id"),
-			"provider" => array(self::BELONGS_TO, "WoodProvider", "provider_id"),
+			"provider" => array(self::BELONGS_TO, "Correspondent", "provider_id"),
 			"group" => array(self::BELONGS_TO, "WoodGroup", "group_id"),
 		);
 	}

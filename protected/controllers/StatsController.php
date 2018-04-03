@@ -13,12 +13,12 @@ class StatsController extends Controller
 	{
 		return array(
 			array("allow",
-				"actions" => array("adminIndex"),
-				"roles" => array("readSaw"),
+				"actions" => array("adminTotal", "adminIndex", "adminCheck", "adminOrder", "adminBoard"),
+				"roles" => array("readWood"),
 			),
 			array("allow",
 				"actions" => array("adminUpdate", "adminDelete", "adminCreate"),
-				"roles" => array("updateSaw"),
+				"roles" => array("updateWood"),
 			),
 			array("deny",
 				"users" => array("*"),
@@ -26,12 +26,13 @@ class StatsController extends Controller
 		);
 	}
 
-	public function actionAdminIndex($partial = false){
-		unset($_GET["partial"]);
-		if( !$partial ){
-			$this->layout = "admin";
-			$this->pageTitle = $this->adminMenu["cur"]->name;
-		}
+	public function actionAdminIndex(){
+		header("Location: ".$this->createUrl('/stats-total/adminindex'));
+	}
+
+	public function actionAdminTotal(){
+		$this->layout = "admin";
+		$this->pageTitle = $this->adminMenu["cur"]->name;
 
 		$startDate = "01.01.".date("Y", time());
 		$months = array(
@@ -213,74 +214,253 @@ class StatsController extends Controller
 			}
 		}
 
-		// var_dump($months);
+		$params = array(
+			"data" => $months,
+			"total" => $total,
+		);
 
-  //       $filter = new Stats('filter');
+		$this->render("adminTotal", $params);
+	}
 
-		// if (isset($_GET['Stats'])){
-  //           $filter->attributes = $_GET['Stats'];
-  //       }
+	public function actionAdminCheck(){
+		$this->layout = "admin";
+		$this->pageTitle = $this->adminMenu["cur"]->name;
 
-  //       $dataProvider = $filter->search(50);
-		// $count = $filter->search(50, true);
+		$providers = Correspondent::model()->providers()->with("orders", "woods")->findAll();
+
+		$total = (object)array(
+			"woods" => 0,
+			"orders" => 0,
+			"total" => 0
+		);
+
+		foreach ($providers as $key => $provider) {
+			$total->total += $provider->sumTotal();
+			$total->woods += $provider->sumWoods;
+			$total->orders += $provider->sumOrders;
+		}
+
+		$params = array(
+			"data" => $providers,
+			"total" => $total,
+		);
+
+		$this->render("adminCheck", $params);
+	}
+
+	public function actionAdminOrder(){
+		$this->layout = "admin";
+		$this->pageTitle = $this->adminMenu["cur"]->name;
+
+		$startDate = "01.01.".date("Y", time());
+		$months = array(
+			1 => array(
+				"name" => "Январь",
+				"order" => array(),
+			),
+			2 => array(
+				"name" => "Февраль",
+				"order" => array(),
+			),
+			3 => array(
+				"name" => "Март",
+				"order" => array(),
+			),
+			4 => array(
+				"name" => "Апрель",
+				"order" => array(),
+			),
+			5 => array(
+				"name" => "Май",
+				"order" => array(),
+			),
+			6 => array(
+				"name" => "Июнь",
+				"order" => array(),
+			),
+			7 => array(
+				"name" => "Июль",
+				"order" => array(),
+			),
+			8 => array(
+				"name" => "Август",
+				"order" => array(),
+			),
+			9 => array(
+				"name" => "Сентябрь",
+				"order" => array(),
+			),
+			10 => array(
+				"name" => "Октярь",
+				"order" => array(),
+			),
+			11 => array(
+				"name" => "Ноябрь",
+				"order" => array(),
+			),
+			12 => array(
+				"name" => "Декабрь",
+				"order" => array(),
+			),
+		);
+
+		// Получаем все поручения за год
+		$orderFilter = new Order('filter');
+		$orderFilter->date_from = $startDate;
+		$orderFilter->is_new = 0;
+		$order = $orderFilter->search(99999999)->getData();
+
+		// Получаем все категории
+		$categories = Category::model()->findAll();
+
+		// Заносим названия столбцов платежных поручений и обнуляем сумму
+		foreach ($months as $i => $month) {
+			foreach ($categories as $j => $category) {
+				$months[$i]["order"]["c".$category->id] = array(
+					"name" => $category->name,
+					"sum" => 0,
+					"negative" => false
+				);
+			}
+		}
+
+		// Суммируем поручения по месяцам
+		foreach ($order as $key => $item) {
+			$monthId = intval(date("n", strtotime($item->date)));
+
+			if( $item->negative ){
+				$months[$monthId]["order"]["c".$item->category_id]["sum"] -= $item->sum;
+			}else{
+				$months[$monthId]["order"]["c".$item->category_id]["sum"] += $item->sum;
+			}	
+		}
+
+		// Создаем массив сумм для столбцов и обнуляем его
+		$total = $months[1]["order"];
+		foreach ($total as $key => $value) {
+			$total[$key] = 0;
+		}
+		$total["order"] = 0;
+
+		// Получаем суммы по столбцам
+		foreach ($months as $i => $month) {
+			foreach ($month["order"] as $j => $col) {
+				$total[$j] += $col["sum"];
+
+				if( $col["negative"] ){
+					$total["order"] -= $col["sum"];
+				}else{
+					$total["order"] += $col["sum"];
+				}
+			}
+		}
 
 		$params = array(
 			"data" => $months,
 			"total" => $total,
 		);
 
-		// if( !$partial ){
-		$this->render("adminIndex", $params);
-		// }else{
-			// $this->renderPartial("adminIndex", $params);
-		// }
+		$this->render("adminOrder", $params);
 	}
 
-	public function actionAdminCreate()
-	{
-		$model = new Stats;
+	public function actionAdminBoard(){
+		$this->layout = "admin";
+		$this->pageTitle = $this->adminMenu["cur"]->name;
 
-		if(isset($_POST["Stats"])) {
-			if( $model->updateObj($_POST["Stats"]) ){
-				$this->actionAdminIndex(true);
-				return true;
-			}
-		} else {
-			$this->renderPartial("adminCreate",array(
-				"model" => $model
-			));
+		$startDate = "01.01.".date("Y", time());
+		$months = array(
+			1 => array(
+				"name" => "Январь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			2 => array(
+				"name" => "Февраль",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			3 => array(
+				"name" => "Март",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			4 => array(
+				"name" => "Апрель",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			5 => array(
+				"name" => "Май",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			6 => array(
+				"name" => "Июнь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			7 => array(
+				"name" => "Июль",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			8 => array(
+				"name" => "Август",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			9 => array(
+				"name" => "Сентябрь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			10 => array(
+				"name" => "Октярь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			11 => array(
+				"name" => "Ноябрь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+			12 => array(
+				"name" => "Декабрь",
+				"sum" => 0,
+				"cubage" => 0,
+			),
+		);
+
+		// Получаем все поручения за год
+		$boardFilter = new Board('filter');
+		$boardFilter->date_from = $startDate;
+		$board = $boardFilter->search(99999999)->getData();
+
+		// Суммируем поручения по месяцам
+		foreach ($board as $key => $item) {
+			$monthId = intval(date("n", strtotime($item->date)));
+
+			$months[$monthId]["sum"] += $item->getSum();
+			$months[$monthId]["cubage"] += $item->getCubageSum();
 		}
-	}
 
-	public function actionAdminUpdate($id)
-	{
-		$model = $this->loadModel($id);
+		// Создаем массив сумм для столбцов и обнуляем его
+		$total = array(
+			"sum" => 0,
+			"cubage" => 0,
+		);
 
-		if(isset($_POST["Stats"])) {
-			if( $model->updateObj($_POST["Stats"]) ){
-				$this->actionAdminIndex(true);
-				return true;
-			}
-		}else{
-			$this->renderPartial("adminUpdate",array(
-				"model" => $model,
-			));
+		// Получаем суммы по столбцам
+		foreach ($months as $i => $month) {
+			$total["sum"] += $month["sum"];
+			$total["cubage"] += $month["cubage"];
 		}
-	}
 
-	public function actionAdminDelete($id)
-	{
-		$this->loadModel($id)->delete();
+		$params = array(
+			"data" => $months,
+			"total" => $total,
+		);
 
-		$this->actionAdminindex(true);
-	}
-
-	public function loadModel($id)
-	{
-		$model = Stats::model()->findByPk($id);
-
-		if($model===null)
-			throw new CHttpException(404, "The requested page does not exist.");
-		return $model;
+		$this->render("adminBoard", $params);
 	}
 }

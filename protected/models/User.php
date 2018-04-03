@@ -59,6 +59,7 @@ class User extends CActiveRecord
 			"roles" => array(self::HAS_MANY, "UserRole", "user_id"),
 			"widgets" => array(self::HAS_MANY, "UserWidget", "user_id"),
 			"branches" => array(self::HAS_MANY, "UserBranch", "user_id"),
+			'settings' => array(self::HAS_MANY, 'UserSettings', 'user_id'),
 		);
 	}
 

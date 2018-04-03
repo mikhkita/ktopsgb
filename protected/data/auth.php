@@ -140,6 +140,20 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
+  'readCorr' => 
+  array (
+    'type' => 0,
+    'description' => 'Просмотр корреспондентов',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
+  'updateCorr' => 
+  array (
+    'type' => 0,
+    'description' => 'Создание/изменение/удаление корреспондентов',
+    'bizRule' => NULL,
+    'data' => NULL,
+  ),
   'readWood' => 
   array (
     'type' => 0,
@@ -298,6 +312,18 @@ return array (
       ),
     ),
   ),
+  'corrManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readCorr',
+      1 => 'updateCorr',
+    ),
+  ),
   'woodManager' => 
   array (
     'type' => 2,
@@ -306,8 +332,9 @@ return array (
     'data' => NULL,
     'children' => 
     array (
-      0 => 'readWood',
-      1 => 'updateWood',
+      0 => 'corrManager',
+      1 => 'readWood',
+      2 => 'updateWood',
     ),
     'assignments' => 
     array (
@@ -442,16 +469,12 @@ return array (
     'data' => NULL,
     'children' => 
     array (
-      0 => 'readOrder',
-      1 => 'updateOrder',
+      0 => 'corrManager',
+      1 => 'readOrder',
+      2 => 'updateOrder',
     ),
     'assignments' => 
     array (
-      6 => 
-      array (
-        'bizRule' => NULL,
-        'data' => NULL,
-      ),
       7 => 
       array (
         'bizRule' => NULL,
