@@ -2,7 +2,7 @@
 	<div class="b-section-nav-back clearfix">
 		<span class="left"><b>Показывать:</b></span>
 		<ul class="b-section-menu clearfix left">
-			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex')?>"<? if($this->isCurrentMonth($filter)): ?> class="active"<? endif; ?>>Текущий месяц</a></li>
+			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex', array("current_month" => true))?>"<? if($this->isCurrentMonth($filter)): ?> class="active"<? endif; ?>>Текущий месяц</a></li>
 			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex', array("previous" => true))?>"<? if($this->isPreviousMonth($filter)): ?> class="active"<? endif; ?>>Предыдущий месяц</a></li>
 		</ul>
 	</div>

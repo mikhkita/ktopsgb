@@ -40,13 +40,13 @@ class CarrierController extends Controller
         }
 
         $dataProvider = $filter->search(50);
-		$count = $filter->search(50, true);
+		$carrierCount = $filter->search(50, true);
 
 		$params = array(
 			"data" => $dataProvider->getData(),
 			"pages" => $dataProvider->getPagination(),
 			"filter" => $filter,
-			"count" => $count,
+			"carrierCount" => $carrierCount,
 			"labels" => Carrier::attributeLabels(),
 		);
 

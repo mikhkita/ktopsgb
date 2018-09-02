@@ -11,12 +11,12 @@
 	<div class="row clearfix">
 		<div class="row-half">
 			<?php echo $form->labelEx($model,"length"); ?>
-			<?php echo $form->textField($model,"length", array("maxlength" => 20, "required" => true, "class" => "float")); ?>
+			<?php echo $form->textField($model,"length", array("maxlength" => 20, "class" => "float")); ?>
 			<?php echo $form->error($model,"length"); ?>
 		</div>
 		<div class="row-half">
 			<?php echo $form->labelEx($model,"thickness"); ?>
-			<?php echo $form->textField($model,"thickness", array("maxlength" => 20, "required" => true, "class" => "float")); ?>
+			<?php echo $form->textField($model,"thickness", array("maxlength" => 20, "class" => "float")); ?>
 			<?php echo $form->error($model,"thickness"); ?>
 		</div>
 	</div>
@@ -28,6 +28,18 @@
 			<?php echo $form->error($model, "type_id"); ?>
 		</div>
 		<div class="row-half">
+			<?php echo $form->labelEx($model,"cubage"); ?>
+			<?php echo $form->textField($model,"cubage", array("maxlength" => 20, "required" => true, "class" => "float")); ?>
+			<?php echo $form->error($model,"cubage"); ?>
+		</div>
+	</div>
+	<div class="row clearfix">
+		<div class="row-half line-inputs">
+			<?php echo $form->labelEx($model,'form_id'); ?>
+			<?php echo $form->radioButtonList($model,'form_id', $model->forms, array("separator"=>"", "class" => "autofirst")); ?>
+			<?php echo $form->error($model,'form_id'); ?>
+		</div>
+		<div class="row-half">
 			<?php echo $form->labelEx($model,"count"); ?>
 			<?php echo $form->textField($model,"count", array("maxlength" => 5, "required" => true, "class" => "numeric")); ?>
 			<?php echo $form->error($model,"count"); ?>
@@ -35,10 +47,10 @@
 	</div>
 
 	<div class="row clearfix">
-		<div class="row-half">
-			<?php echo $form->labelEx($model,"cubage"); ?>
-			<?php echo $form->textField($model,"cubage", array("maxlength" => 20, "required" => true, "class" => "float")); ?>
-			<?php echo $form->error($model,"cubage"); ?>
+		<div class="row-half line-inputs">
+			<?php echo $form->labelEx($model,'currency_id'); ?>
+			<?php echo $form->radioButtonList($model,'currency_id', $model->currencies, array("separator"=>"", "class" => "autofirst")); ?>
+			<?php echo $form->error($model,'currency_id'); ?>
 		</div>
 		<div class="row-half">
 			<?php echo $form->labelEx($model,"price"); ?>

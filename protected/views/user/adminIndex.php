@@ -5,9 +5,9 @@
 		<th style="width: 30px;">№</th>
 		<th><?=$labels["login"]?></th>
 		<th><?=$labels["name"]?></th>
-		<th><?=$labels["surname"]?></th>
 		<th><?=$labels["email"]?></th>
 		<th><?=$labels["roles"]?></th>
+		<th><?=$labels["branches"]?></th>
 		<th style="width: 90px;">Действия</th>
 	</tr>
 	<? foreach ($data as $i => $item): ?>
@@ -15,9 +15,9 @@
 			<td><?=$item->id?></td>
 			<td class="align-left"><?=$item->login?></td>
 			<td class="align-left"><?=$item->name?></td>
-			<td class="align-left"><?=$item->surname?></td>
 			<td class="align-left"><?=$item->email?></td>
 			<td><?=implode(", ", $item->getRoleNames())?></td>
+			<td><?=implode(", ", $item->getBranches())?></td>
 			<td><a href="<?=Yii::app()->createUrl("/user/adminUpdate",array("id"=>$item->id))?>" class="ajax-form ajax-update b-tool b-tool-update" title="Редактировать раздел"></a><a href="<?=Yii::app()->createUrl("/user/adminDelete",array("id"=>$item->id))?>" class="ajax-form ajax-delete b-tool b-tool-delete" title="Удалить раздел"></a></td>
 		</tr>
 	<? endforeach; ?>

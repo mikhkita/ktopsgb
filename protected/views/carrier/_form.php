@@ -8,9 +8,16 @@
 	<?php echo $form->errorSummary($model); ?>
 
 	<div class="row clearfix">
-		<?php echo $form->labelEx($model, "name"); ?>
-		<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
-		<?php echo $form->error($model, "name"); ?>
+		<div class="row-half">
+			<?php echo $form->labelEx($model, "name"); ?>
+			<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
+			<?php echo $form->error($model, "name"); ?>
+		</div>
+		<div class="row-half">
+			<?php echo $form->labelEx($model, "branch_id"); ?>
+			<?php echo $form->dropDownList($model, "branch_id", CHtml::listData(Branch::model()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Не выбрано", "required" => true)); ?>
+			<?php echo $form->error($model, "branch_id"); ?>
+		</div>
 	</div>
 
 	<div class="row buttons">

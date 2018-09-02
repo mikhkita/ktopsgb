@@ -25,12 +25,12 @@ class UserBranch extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('user_id, branch_id', 'required'),
-			array('branch_id', 'numerical', 'integerOnly'=>true),
+			array('user_id, branch_id, w', 'required'),
+			array('branch_id, w', 'numerical', 'integerOnly'=>true),
 			array('user_id', 'length', 'max'=>10),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('user_id, branch_id', 'safe', 'on'=>'search'),
+			array('user_id, branch_id, w', 'safe', 'on'=>'search'),
 		);
 	}
 

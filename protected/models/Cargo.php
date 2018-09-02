@@ -15,6 +15,18 @@
  */
 class Cargo extends CActiveRecord
 {
+	public $form = NULL;
+	public $currency = NULL;
+	public $forms = array(
+		1 => "Пачки",
+		2 => "Валом",
+	);
+	public $currencies = array(
+		1 => "RUB",
+		2 => "CNY",
+		3 => "USD",
+	);
+
 	/**
 	 * @return string the associated database table name
 	 */
@@ -31,8 +43,8 @@ class Cargo extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("type_id, length, thickness, cubage, count, price, container_id", "required"),
-			array("type_id, count", "numerical", "integerOnly" => true),
+			array("type_id, cubage, count, price, container_id", "required"),
+			array("type_id, count, form_id, currency_id", "numerical", "integerOnly" => true),
 			array("length, thickness, cubage, price", "numerical"),
 			array("container_id", "length", "max" => 10),
 			// The following rule is used by search().
@@ -54,6 +66,14 @@ class Cargo extends CActiveRecord
 		);
 	}
 
+	public function afterFind()
+	{
+		parent::afterFind();
+
+		$this->form = $this->forms[$this->form_id];
+		$this->currency = $this->currencies[$this->currency_id];
+	}
+
 	/**
 	 * @return array customized attribute labels (name=>label)
 	 */
@@ -65,10 +85,12 @@ class Cargo extends CActiveRecord
 			"length" => "Длина",
 			"thickness" => "Толщина",
 			"cubage" => "Кубатура",
-			"count" => "Количество пачек",
+			"count" => "Количество",
 			"price" => "Цена за куб",
 			"sum" => "Сумма",
 			"container_id" => "Контейнер",
+			"currency_id" => "Валюта",
+			"form_id" => "Вид упаковки",
 		);
 	}
 
@@ -98,6 +120,8 @@ class Cargo extends CActiveRecord
 		$criteria->compare("count", $this->count);
 		$criteria->compare("price", $this->price);
 		$criteria->addSearchCondition("container_id", $this->container_id);
+		$criteria->addSearchCondition("form_id", $this->form_id);
+		$criteria->addSearchCondition("currency_id", $this->currency_id);
 
 		if( $count ){
 			return Cargo::model()->count($criteria);

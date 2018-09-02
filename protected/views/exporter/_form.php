@@ -8,22 +8,27 @@
 	<?php echo $form->errorSummary($model); ?>
 
 	<div class="row clearfix">
-		<div class="row-half">
-			<?php echo $form->labelEx($model, "name"); ?>
-			<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
-			<?php echo $form->error($model, "name"); ?>
-		</div>
+		<?php echo $form->labelEx($model, "name"); ?>
+		<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
+		<?php echo $form->error($model, "name"); ?>
+	</div>
+	<div class="row clearfix">
 		<div class="row-half">
 			<?php echo $form->labelEx($model, "email"); ?>
 			<?php echo $form->textField($model, "email", array("maxlength" => 64)); ?>
 			<?php echo $form->error($model, "email"); ?>
 		</div>
+		<div class="row-half">
+			<?php echo $form->labelEx($model, "sort"); ?>
+			<?php echo $form->textField($model, "sort", array("maxlength" => 6, "required" => true, "class" => "numeric")); ?>
+			<?php echo $form->error($model, "sort"); ?>
+		</div>
 	</div>
 
-	<div class="row">
-		<?php echo $form->labelEx($model, "group_id"); ?>
-		<?php echo $form->dropDownList($model, "group_id", CHtml::listData(ExporterGroup::model()->sorted()->findAll(), 'id', 'name'), array("class" => "select2", "empty" => "Создать новую группу")); ?>
-		<?php echo $form->error($model, "group_id"); ?>
+	<div class="row line-inputs">
+		<?php echo $form->labelEx($model, "branches"); ?>
+		<?=CHTML::checkBoxList("Branches", $branches, CHtml::listData(Branch::model()->findAll(), "id", "name"), array("separator" => "")); ?>
+		<?php echo $form->error($model, "branches"); ?>
 	</div>
 
 	<div class="row buttons">

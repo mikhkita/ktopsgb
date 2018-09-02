@@ -27,7 +27,8 @@ class Consignee extends CActiveRecord
 		// will receive user inputs.
 		return array(
 			array("name", "required"),
-			array("name, email", "length", "max" => 64),
+			array("name", "length", "max" => 256),
+			array("email", "length", "max" => 128),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
 			array("id, name, email", "safe", "on" => "search"),

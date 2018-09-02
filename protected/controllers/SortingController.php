@@ -72,47 +72,54 @@ class SortingController extends Controller
 
 	public function actionAdminImport($company_id)
 	{
-		$company = Company::model()->findByPk($company_id);
-		$filename = Yii::app()->params['tempFolder']."/".$_POST["file"];
+		if( isset($_POST["file"]) ){
+			$company = Company::model()->findByPk($company_id);
+			$filename = Yii::app()->params['tempFolder']."/".$_POST["file"];
 
-		$client = new BankClient($company->inn);
+			$client = new BankClient($company->inn);
 
-		$params = array(
-			"error" => NULL,
-			"company_id" => $company_id
-		);
+			$params = array(
+				"error" => NULL,
+				"company_id" => $company_id
+			);
 
-		if( $orders = $client->readOrders($filename) ){
-			$countOrders = count($orders);
-			$countWarnings = count($client->warnings);
-			$percent = $countWarnings/$countOrders*100;
+			if( $orders = $client->readOrders($filename) ){
+				$countOrders = count($orders);
+				$countWarnings = count($client->warnings);
+				$percent = $countWarnings/$countOrders*100;
 
-			if( $countWarnings ){
-				if( $percent > 80 ){
-					$params["error"] = "Загружен неверный файл (возможно неверная компания)";
-				}else{
-					$params["error"] = implode("<br>", $client->warnings);
+				if( $countWarnings ){
+					if( $percent > 80 ){
+						$params["error"] = "Загружен неверный файл (возможно неверная компания)";
+					}else{
+						$params["error"] = implode("<br>", $client->warnings);
+					}
+				}else{// Если нет ошибок, то добавляем платежные поручения
+
+					$corrArr = $client->getCorrArr();
+
+					// Добавляем новых корреспондентов, если есть такие
+					Correspondent::addNew($client->getCorrArr());
+
+					// Получаем всех корреспондентов
+					$corrs = Correspondent::findAllByInn( $this->getIds($corrArr, "inn") );
+
+					// Добавляем новые поручения, если такие есть
+					Order::addNew($company_id, $orders, $corrs);
+
+					header("Location: ".$this->createUrl("/".$this->adminMenu["cur"]->code."/adminIndex", array("company_id" => $company_id)));
 				}
-			}else{// Если нет ошибок, то добавляем платежные поручения
-
-				$corrArr = $client->getCorrArr();
-
-				// Добавляем новых корреспондентов, если есть такие
-				Correspondent::addNew($client->getCorrArr());
-
-				// Получаем всех корреспондентов
-				$corrs = Correspondent::findAllByInn( $this->getIds($corrArr, "inn") );
-
-				// Добавляем новые поручения, если такие есть
-				Order::addNew($company_id, $orders, $corrs);
-
-				header("Location: ".$this->createUrl("/".$this->adminMenu["cur"]->code."/adminIndex", array("company_id" => $company_id)));
+			}else{
+				echo $client->error;
+				$params["error"] = "Не удалось получить платежные поручения из файла";
 			}
-		}else{
-			$params["error"] = "Не удалось получить платежные поручения из файла";
-		}
 
-		$this->render("adminImport", $params);
+			$this->render("adminImport", $params);
+		}else{
+			$this->renderPartial("adminImportForm",array(
+				// "model" => $model,
+			));
+		}
 
 		// $data = array();
 		// foreach ($variable as $key => $value) {

@@ -6,6 +6,7 @@
  * The followings are the available columns in table "carrier":
  * @property integer $id
  * @property string $name
+ * @property integer $branch_id
  */
 class Carrier extends CActiveRecord
 {
@@ -25,11 +26,24 @@ class Carrier extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array("name", "required"),
-			array("name", "length", "max" => 64),
+			array("name, branch_id", "required"),
+			array("branch_id", "numerical", "integerOnly" => true),
+			array("name", "length", "max" => 128),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, name", "safe", "on" => "search"),
+			array("id, name, branch_id", "safe", "on" => "search"),
+		);
+	}
+
+	/**
+	 * @return array customized attribute labels (name=>label)
+	 */
+	public function attributeLabels()
+	{
+		return array(
+			"id" => "ID",
+			"name" => "Наиманование",
+			"branch_id" => "Филиал",
 		);
 	}
 
@@ -42,17 +56,7 @@ class Carrier extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			"containers" => array(self::HAS_MANY, "Container", "carrier_id"),
-		);
-	}
-
-	/**
-	 * @return array customized attribute labels (name=>label)
-	 */
-	public function attributeLabels()
-	{
-		return array(
-			"id" => "ID",
-			"name" => "Наименование",
+			"branch" => array(self::BELONGS_TO, "Branch", "branch_id"),
 		);
 	}
 
@@ -76,6 +80,7 @@ class Carrier extends CActiveRecord
 
 		$criteria->compare("id", $this->id);
 		$criteria->addSearchCondition("name", $this->name);
+		$criteria->compare("branch_id", $this->branch_id);
 
 		if( $count ){
 			return Carrier::model()->count($criteria);

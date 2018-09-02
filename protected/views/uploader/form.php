@@ -42,7 +42,12 @@ if( !isset($tmpPath) ){
 <script>
 $(function () {
     var maxfiles = <?=$maxFiles?>,
-        error = false;
+        error = false,
+        multi_select = false;
+
+    <?if(isset($maxFiles) && $maxFiles > 1):?>
+        var multi_select = true;
+    <?endif;?>
 
     $("#uploaderPj").pluploadQueue({
         runtimes : 'html5',                          
@@ -51,7 +56,7 @@ $(function () {
         max_file_count: maxfiles,
         chunk_size : '1mb',
         unique_names : true,
-        multi_selection:false,
+        multi_selection: multi_select,
         resize: {
             width: 800,
             height: 600
@@ -90,6 +95,11 @@ $(function () {
                     <?if(isset($afterLoad)):?>
                         customHandlers["<?=$afterLoad?>"](tmpArr);
                     <?endif;?>
+
+                    $(".plupload_save").click();
+                    if( $(".plupload_start").attr("data-save") == "1" ){
+                        $(".plupload_start").parents("form").submit();
+                    }
                 }
             },
             FileUploaded: function(upldr, file, object) {

@@ -20,9 +20,9 @@
 			<?php echo $form->error($model, "name"); ?>
 		</div>
 		<div class="row-half">
-			<?php echo $form->labelEx($model, "surname"); ?>
-			<?php echo $form->textField($model, "surname", array("maxlength" => 255)); ?>
-			<?php echo $form->error($model, "surname"); ?>
+			<?php echo $form->labelEx($model, "email"); ?>
+			<?php echo $form->textField($model, "email", array("maxlength" => 255, "required" => true)); ?>
+			<?php echo $form->error($model, "email"); ?>
 		</div>
 	</div>
 
@@ -41,15 +41,15 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model, "email"); ?>
-		<?php echo $form->textField($model, "email", array("maxlength" => 255, "required" => true)); ?>
-		<?php echo $form->error($model, "email"); ?>
-	</div>
-
-	<div class="row line-inputs">
 		<?php echo $form->labelEx($model, "branches"); ?>
-		<?=CHTML::checkBoxList("Branches", $branches, CHtml::listData(Branch::model()->findAll(), "id", "name"), array("separator" => "", "template" => '<div class="line-item">{input}{label}</div>')); ?>
-		<?php echo $form->error($model, "branches"); ?>
+		<table class="b-radio-table">
+			<? foreach ($branches as $id => $branch): ?>
+				<tr>
+					<td><?=$branch->name?></td>
+					<td class="line-inputs"><?=CHTML::radioButtonList("Branches[$id]", $branch->value, array("" => "Нет", 1 => "Просмотр", 2 => "Редактирование"), array("separator" => "", "template" => '<div class="line-item">{input}{label}</div>')); ?></td>
+				</tr>
+			<? endforeach; ?>
+		</table>
 	</div>
 
 	<div class="row clearfix">

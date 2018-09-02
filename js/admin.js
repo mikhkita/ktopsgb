@@ -5,7 +5,11 @@ $(document).ready(function(){
         title = window.location.href,
         titleVar = ( title.split("localhost").length > 1 )?4:3,
         progress = new KitProgress("#FFF",2),
-        shift = false;
+        shift = false,
+        addUrl,
+        removeUrl,
+        addManyUrl,
+        removeManyUrl;
 
     progress.endDuration = 0.3;
 
@@ -67,6 +71,7 @@ $(document).ready(function(){
         beforeShow: function(){
             var $form = $(".fancybox-inner form");
             bindForm($form);
+            bindSortable();
             bindImageUploader();
             bindTinymce();
             bindAutocomplete();
@@ -144,7 +149,6 @@ $(document).ready(function(){
 
     $("body").on("click", ".ajax-action", function(){
         if( $(this).hasClass("require-checkbox") && $("#b-sess-checkbox-list").text() == "" ){
-            alert("Не выделено ни одного элемента");
             return false;
         }
 
@@ -173,6 +177,14 @@ $(document).ready(function(){
             $(".main .b-filter").find("select, input").bind("change",function(){
                 var $form = $(this).parents("form");
 
+                if( $(this).hasClass("branch-select") ){
+                    // $form.find(".b-clear-filter").click();
+                    // return true;
+                    $("[name='set_filter']").val("");
+                }else{
+                    $("[name='set_filter']").val("true");
+                }
+
                 progress.setColor("#D26A44");
                 progress.start(3);
 
@@ -194,12 +206,18 @@ $(document).ready(function(){
                 return false;
             });
             $(".b-clear-filter").click(function(){
-                $(".main form select,.main form input[type='text']").val("");
-                $(".main form select,.main form input[type='text']:not(.select2-offscreen, .select2-input)").eq(0).trigger("change");
+                $(".main form select:not(.no-clear),.main form input[type='text']").val("");
+                $(".main form select:not(.no-clear),.main form input[type='text']:not(.select2-offscreen, .select2-input)").eq(0).trigger("change");
                 return false;
             });
 
             bindDate($(".main .b-filter").parents("form"));
+        }
+        if( $(".b-sess-checkbox").length ){
+            addUrl = $(".b-sess-checkbox-info").attr("data-add-url");
+            removeUrl = $(".b-sess-checkbox-info").attr("data-remove-url");
+            addManyUrl = $(".b-sess-checkbox-info").attr("data-add-many-url");
+            removeManyUrl = $(".b-sess-checkbox-info").attr("data-remove-many-url");
         }
     }
 
@@ -279,6 +297,7 @@ $(document).ready(function(){
 
         $form.validate({
             ignore: "",
+            ignoreTitle: true,
             rules: {
                 
             }
@@ -308,6 +327,8 @@ $(document).ready(function(){
         $(".float").numericInput({ allowFloat: true, allowNegative: true });
         
         $form.submit(function(e,a){
+            if( !checkFiles() ) return false;
+
             removeNewInputs();
 
             tinymce.triggerSave();
@@ -332,6 +353,10 @@ $(document).ready(function(){
                 if( a == false ){
                     $form.find("input[type='text'],input[type='number'],textarea").val("");
                     $form.find("input").eq(0).focus();
+                }
+
+                if( $(this).hasClass("no-ajax") ){
+                    return true;
                 }
 
                 $.ajax({
@@ -384,6 +409,14 @@ $(document).ready(function(){
             cont.find(".b-input-image").val(cont.find(".b-image-cancel").attr("data-url")).trigger("change")// Возвращаем сохраненную ссылку на изображение в поле
             cont.find(".b-image-cancel").hide(); // Прячем кнопку отмены удаления                                 
         });
+    }
+
+    function checkFiles(){
+        if( $(".plupload_start:not(.plupload_disabled)").length ){
+            $(".plupload_start:not(.plupload_disabled)").attr("data-save", "1").click();
+            return false;
+        }
+        return true;
     }
 
     function bindAutoSum(){
@@ -868,6 +901,18 @@ $(document).ready(function(){
     }
     /* Variants ------------------------------------ Variants */
 
+    /* Sortable ------------------------------------ Sortable */    
+    function bindSortable(){
+        if( $("#b-sortable-cont").length ){
+            if( $("#b-sortable-cont>span").length ){
+                $("#b-sortable-cont").html($("#b-sortable-cont>span").html());
+                $("#b-sortable-cont input[value='number'], #b-sortable-cont input[value='issue_date']").prop("checked", true).attr("onclick", "return false;");
+            }
+            $("#b-sortable-cont").sortable().disableSelection();
+        }
+    }
+    /* Sortable ------------------------------------ Sortable */    
+
     /* Left menu ----------------------------------- Left menu */
     if( $(".b-menu-accordeon").length ){
         $("body").on("click", ".b-menu-accordeon", function(){
@@ -889,11 +934,6 @@ $(document).ready(function(){
     };
 
     if( $(".b-sess-checkbox").length ){
-        var addUrl = $(".b-sess-checkbox-info").attr("data-add-url"),
-            removeUrl = $(".b-sess-checkbox-info").attr("data-remove-url"),
-            addManyUrl = $(".b-sess-checkbox-info").attr("data-add-many-url"),
-            removeManyUrl = $(".b-sess-checkbox-info").attr("data-remove-many-url");
-
         $("body").on("click",".b-sess-allcheckbox",function(){
             var $this = $(this);
             progress.setColor("#D26A44");
@@ -971,7 +1011,7 @@ $(document).ready(function(){
 
         $.ajax({
             url: ( $this.prop("checked") )?addUrl:removeUrl,
-            data: "id="+$this.val(),
+            data: "container_id="+$this.val(),
             success: function(msg){
                 var json = JSON.parse(msg);
                 progress.end();
@@ -993,6 +1033,12 @@ $(document).ready(function(){
         });
     }
     /* Selection ----------------------------------- Selection */
+
+    if( $(".branch-select").length ){
+        $(".branch-select").change(function(){
+
+        });
+    }
 
     if( $(".b-ajax-update").length ){
         $(".b-ajax-update").change(function(){
@@ -1043,6 +1089,19 @@ $(document).ready(function(){
             "-webkit-transition":  "all "+dur+"s ease-in-out", "-moz-transition":  "all "+dur+"s ease-in-out", "-o-transition":  "all "+dur+"s ease-in-out", "transition":  "all "+dur+"s ease-in-out"
         });
     }
+
+    /* Files --------------------------------------- Files */
+    $("body").on("click", ".b-file-remove", function(){
+        var $cont = $(this).parents(".b-doc-file");
+        if( $cont.hasClass("removed") ){
+            $(this).parents(".b-doc-file").removeClass("removed");
+            $("#"+$(this).attr("data-id")).prop("checked", false);
+        }else{
+            $(this).parents(".b-doc-file").addClass("removed");
+            $("#"+$(this).attr("data-id")).prop("checked", true);
+        }
+    });
+    /* Files --------------------------------------- Files */
 
     bindFilter();
     bindAutocomplete();

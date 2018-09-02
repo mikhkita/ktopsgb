@@ -10,12 +10,12 @@
 	<div class="row clearfix">
 		<div class="row-half">
 			<?php echo $form->labelEx($model, "name"); ?>
-			<?php echo $form->textField($model, "name", array("maxlength" => 64, "required" => true)); ?>
+			<?php echo $form->textField($model, "name", array("maxlength" => 256, "required" => true)); ?>
 			<?php echo $form->error($model, "name"); ?>
 		</div>
 		<div class="row-half">
 			<?php echo $form->labelEx($model, "email"); ?>
-			<?php echo $form->textField($model, "email", array("maxlength" => 64, "class" => "email")); ?>
+			<?php echo $form->textField($model, "email", array("maxlength" => 128, "class" => "email")); ?>
 			<?php echo $form->error($model, "email"); ?>
 		</div>
 	</div>

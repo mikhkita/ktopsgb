@@ -39,7 +39,7 @@ class Controller extends CController
     public function init() {
         parent::init();
         date_default_timezone_set("Asia/Krasnoyarsk");
-        $this->user = User::model()->with("roles.role")->findByPk(Yii::app()->user->id);
+        $this->user = User::model()->with("roles.role", "branches")->findByPk(Yii::app()->user->id);
 
         $this->adminMenu["items"] = ModelNames::model()->with("submenu")->findAll(array("order" => "t.sort ASC", "condition" => "t.parent=0"));
 
@@ -147,18 +147,23 @@ class Controller extends CController
 
     public function readDates(&$model){
         $modelName = get_class($model);
+        $from = NULL;
+        $to = NULL;
 
-        if( isset($_GET["previous"]) ){
+        if( isset($_GET["current_month"]) ){
+            $from = $this->getCurrentMonthFrom();
+        }else if( isset($_GET["previous"]) ){
             $previousMonth = $this->getPreviousMonth();
 
-            $model->date_from = $previousMonth->from;
-            $model->date_to = $previousMonth->to;
-
-            return true;
+            $from = $previousMonth->from;
+            $to = $previousMonth->to;
+        }else if( isset($_GET["current_year"]) ){
+            $from = $this->getCurrentYearFrom();
+        }else{
+            $from = (isset($_GET[$modelName]["date_from"]))?$_GET[$modelName]["date_from"]:NULL;
+            $to = (isset($_GET[$modelName]["date_to"]))?$_GET[$modelName]["date_to"]:NULL;
         }
 
-        $from = (isset($_GET[$modelName]["date_from"]))?$_GET[$modelName]["date_from"]:NULL;
-        $to = (isset($_GET[$modelName]["date_to"]))?$_GET[$modelName]["date_to"]:NULL;
         if( $from === NULL && $to === NULL ){
 
             // Проверка на наличие дат в сессии (пока не заносим туда)
@@ -170,10 +175,37 @@ class Controller extends CController
                 // Дефолтные значения
                 $from = $this->getCurrentMonthFrom();
             }
+        }else{
+            $_SESSION[$modelName]["date"]["from"] = $from;
+            $_SESSION[$modelName]["date"]["to"] = $to;
         }
 
         $model->date_from = $from;
         $model->date_to = $to;
+    }
+
+    public function setSessionFilter($filter, $modelName, $fields, $type = ""){
+        if ( isset($_GET["set_filter"]) && $_GET["set_filter"] == "true" ){
+            if(isset($_GET[$modelName]) ){
+                // foreach ($_GET[$modelName] as $key => $value) {
+                //     if( !isset($fields[$key][$value]) ){
+                //         unset($_GET[$modelName][$key]);
+                //     }
+                // }
+                // print_r($_GET[$modelName]);
+
+                $filter->attributes = $_GET[$modelName];
+                $this->setUserParam($modelName.$type."_filter", $_GET[$modelName]);
+            }else{
+                $this->setUserParam($modelName.$type."_filter", NULL);
+            }
+        }else{
+            if( $params = $this->getUserParam($modelName.$type."_filter") ){
+                $filter->attributes = (array) $params;
+            }
+        }
+
+        return $filter;
     }
 
     public function insertValues($tableName, $values){
@@ -318,11 +350,23 @@ class Controller extends CController
     public function getTextCheckboxes($key){
         if(!isset($_SESSION)) session_start();
 
+        Controller::checkCheckboxes($key);
+
         return ((count($_SESSION[$key]))?(Controller::pluralForm(count($_SESSION[$key]), array("Выделен", "Выделено", "Выделено"))." ".count($_SESSION[$key])." ".Controller::pluralForm(count($_SESSION[$key]), array("контейнер", "контейнера", "контейнеров")).": ".implode(", ", $_SESSION[$key])):"");
+    }
+
+    public function checkCheckboxes($key){
+        if( is_array($_SESSION[$key]) && count($_SESSION[$key]) ){
+            $container_ids = Controller::getAssoc(Container::model()->findAll("id IN (".implode(", ", array_keys($_SESSION[$key])).")"));
+
+            $_SESSION[$key] = array_intersect_key($_SESSION[$key], $container_ids);
+        }
     }
 
     public function getCheckboxes($key){
         if(!isset($_SESSION)) session_start();
+
+        Controller::checkCheckboxes($key);
 
         return (isset($_SESSION[$key]))?array_keys($_SESSION[$key]):array();
     }
@@ -371,6 +415,20 @@ class Controller extends CController
             $this->user_settings[$param_code] = $value;
     }
 
+    public function getSortedAttributes($attributes){
+        $order = $this->getUserParam("container_view");
+        $outArr = array();
+        if( is_array($order) && count($order) ){
+            foreach ($order as $key => $value) {
+                if( isset($attributes[ $value ]) ){
+                    $outArr[ $value ] = $attributes[ $value ];
+                    unset($attributes[ $value ]);
+                }
+            }
+        }
+        return array_merge($outArr, $attributes);
+    }
+
     public function splitByRows($row_count, $items){
         $out = array();
         $i = 0;
@@ -402,6 +460,11 @@ class Controller extends CController
         return $model->date_from == $this->getCurrentMonthFrom() && $model->date_to == NULL;
     }
 
+    public function isCurrentYear($model){
+        echo $this->getCurrentYearFrom();
+        return $model->date_from == $this->getCurrentYearFrom() && $model->date_to == NULL;
+    }
+
     public function isPreviousMonth($model){
         $previousMonth = $this->getPreviousMonth();
         return $model->date_from == $previousMonth->from && $model->date_to == $previousMonth->to;
@@ -409,6 +472,10 @@ class Controller extends CController
 
     public function getCurrentMonthFrom(){
         return date("d.m.Y", strtotime("first day of this month"));
+    }
+
+    public function getCurrentYearFrom(){
+        return "01.01.".date("Y");
     }
 
     public function getPreviousMonth(){
@@ -429,6 +496,18 @@ class Controller extends CController
 
     public function replaceToSpan($str){
         return "<span>".str_replace("<br>", "</span><span>", $str)."</span>";
+    }
+
+    public function checkSubAccess($menuItem){
+        if( !count($menuItem->submenu) ) return true;
+
+        foreach ($menuItem->submenu as $key => $item) {
+            if( $item->rule == NULL || Yii::app()->user->checkAccess($item->rule) ){
+                return true;
+            }
+        }
+        // 
+        return false;
     }
 
     public function writeExcel($data, $title = "Новый экспорт"){
@@ -462,6 +541,66 @@ class Controller extends CController
         return $excelDir."/".$filename;
     }
 
+    public function removeFiles($ids = array()){
+        if( !count($ids) ) return false;
+
+        $files = File::model()->findAll("id IN (".implode(", ", $ids).")");
+
+        if( count($files) ){
+            $out = array();
+            foreach ($files as $key => $file) {
+                array_push($out, $file->original);
+            }
+
+            $note = Note::model()->findByPk($files[0]->note_id);
+
+            // Log::add("1".$note->type_id, $note->item_id, $note->getItemName()." (".$note->item_id.")", 6, "Примечание от ".$note->date."<br>".implode("<br>", $out));
+        }
+
+        File::model()->updateAll(array("note_id" => 0), "id IN (".implode(", ", $ids).")");
+    }
+
+    public function addFiles($noteId){
+        $count = $_POST["uploaderPj_count"];
+        $out = array();
+
+        for( $i = 0; $i < $count; $i++ ){
+            $name = $_POST["uploaderPj_".$i."_tmpname"];
+            $original = $_POST["uploaderPj_".$i."_name"];
+            $status = $_POST["uploaderPj_".$i."_status"];
+
+            if( $status == "done" ){
+                if( $this->saveFile($name) ){
+                    $file = new File();
+                    $file->original = $original;
+                    $file->name = $name;
+                    $file->note_id = $noteId;
+                    if( !$file->save() ){
+                        print_r($file->getErrors());
+                    }else{
+                        array_push($out, $file->original);
+                    }
+                }
+            }
+        }
+
+        if( count($out) ){
+            $note = Note::model()->findByPk($noteId);
+
+            // Log::add("1".$note->type_id, $note->item_id, $note->getItemName()." (".$note->item_id.")", 5, "Примечание от ".$note->date."<br>".implode("<br>", $out));
+        }
+    }
+
+    public function saveFile($name){
+        $arr = explode("/", $name);
+        $name = array_pop($arr);
+
+        $tmpFileName = Yii::app()->params['tempFolder']."/".$name;
+        $fileName = Yii::app()->params['saveFolder']."/".$name;
+
+        return rename($tmpFileName, $fileName);
+    }   
+
     public function DownloadFile($source, $filename) {
         if (file_exists($source)) {
         
@@ -470,6 +609,11 @@ class Controller extends CController
             }
 
             $arr = explode(".", $source);
+            $tmp = explode(".", $filename);
+
+            if( count($tmp) > 1 ){
+                $filename = $tmp[0];
+            }
             
             header("HTTP/1.0 200 OK");
             header('Content-Description: File Transfer');
@@ -483,6 +627,74 @@ class Controller extends CController
             
             readfile($source);
             exit;
+        }
+    }
+
+    public function checkAccessByBranchID($rule, $branch_id){
+        if( !$this->checkAccess($rule, $branch_id) ){
+            throw new CHttpException(403, "You are not authorized to perform this action.");
+        }
+    }
+
+    public function checkAccessByContainer($rule, $container){
+        if( !isset($container->id) ){
+            $container = Container::model()->with("station")->findByPk($container);
+        }
+        if( !$container ){
+            throw new CHttpException(403, "Access error: container does not exist.");
+        }
+        if( !$this->checkAccess($rule, $container->station->branch_id) ){
+            throw new CHttpException(403, "You are not authorized to perform this action.");
+        }
+    }
+
+    public function checkAccess($rule, $branch_id = NULL){
+        switch ($rule) {
+            case "readBranch":
+                return $this->accessBranch($branch_id);
+                break;
+            case "updateBranch":
+                return $this->accessBranch($branch_id, true);
+                break;
+            
+            default:
+                return Yii::app()->user->checkAccess($rule);
+                break;
+        }
+        // checkAccess
+    }
+
+    public function accessBranch($branch_id = NULL, $update = false){
+        $branch_id = (isset($_GET["branch_id"]) && $branch_id === NULL)?$_GET["branch_id"]:$branch_id;
+
+        foreach ($this->user->branches as $key => $branch) {
+            if( $branch->branch_id == $branch_id ){
+                if( $update && !$branch->w ){
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function accessAnyBranches($update = false){
+        $user_id = Yii::app()->user->id;
+
+        return ( UserBranch::model()->count("user_id = '$user_id'".(($update)?" AND w='1'":"")) != 0 );
+    }
+
+    public function getBackLink($name, $default, $partial = false){
+        if( $partial ){
+            return ( isset($_SESSION[$name]) )?$_SESSION[$name]:$default;
+        }else{
+            if( isset($_SERVER["HTTP_REFERER"]) && $_SERVER["HTTP_REFERER"] ){
+                $_SESSION[$name] = $_SERVER["HTTP_REFERER"];
+                return $_SERVER["HTTP_REFERER"];
+            }else{
+                return $default;   
+            }
         }
     }
 }

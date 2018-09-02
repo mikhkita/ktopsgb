@@ -23,6 +23,77 @@ class SiteController extends Controller
 		);
 	}
 
+    public function accessRules()
+    {
+        return array(
+            array("allow",
+                "actions" => array("notifications"),
+                "users" => array("*"),
+            ),
+            array("allow",
+                "actions" => array("download", "viewFile"),
+                "roles" => array("readContainer"),
+            ),
+            array("allow",
+                "actions" => array("upload", "install"),
+                "roles" => array("updateContainer"),
+            ),
+            array("allow",
+                "actions" => array("error", "index", "login", "logout"),
+                "users" => array("*"),
+            ),
+            array("deny",
+                "users" => array("*"),
+            ),
+        );
+    }
+
+    public function actionDownload($file_id){
+        $file = File::model()->findByPk($file_id);
+        if($file===null)
+            throw new CHttpException(404, "The requested page does not exist.");
+
+        $this->downloadFile(Yii::app()->params['saveFolder']."/".$file->name, $file->original);
+    }
+
+    public function actionViewFile($file_id){
+        $file = File::model()->findByPk($file_id);
+        if($file===null)
+            throw new CHttpException(404, "The requested page does not exist.");
+
+        $filename = Yii::app()->params['saveFolder']."/".$file->name;
+        if (file_exists($filename)) {
+            $ext = array_pop(explode(".", $filename));
+            // header('Content-Description: File Transfer');
+            switch (strtolower($ext)) {
+                case "pdf":
+                    header('Content-Type: application/pdf');
+                    break;
+                case "jpg":
+                case "jpeg":
+                case "png":
+                case "gif":
+                case "gif":
+                    header('Content-Type: image/'.$ext);
+                    break;
+                
+                default:
+                    header('Content-Type: application/octet-stream');
+                    break;
+            }
+            // header('Content-Disposition: attachment; filename="'.basename($filename).'"');
+            // header('Expires: 0');
+            // header('Cache-Control: must-revalidate');
+            // header('Pragma: public');
+            header('Content-Length: ' . filesize($filename));
+            readfile($filename);
+            exit;
+        }
+
+        // readfile(Yii::app()->params['saveFolder']."/".$file->name);
+        // $this->downloadFile(, $file->original);
+    }
+
 	/**
 	 * This is the action to handle external exceptions.
 	 */
@@ -68,7 +139,13 @@ class SiteController extends Controller
 	public function actionLogin()
 	{
         $this->layout="service";
-		if( !Yii::app()->user->isGuest ) $this->redirect($this->createUrl(Yii::app()->params["defaultAdminRedirect"]));
+		if( !Yii::app()->user->isGuest ){
+            foreach ($this->adminMenu["items"]as $key => $modelName) {
+                if( $modelName->rule !== NULL && Yii::app()->user->checkAccess($modelName->rule) ){
+                    $this->redirect($this->createUrl("admin/".$modelName->code));
+                }
+            }
+        }
 
 		// $this->layout="admin";
 		if (!defined("CRYPT_BLOWFISH")||!CRYPT_BLOWFISH)
@@ -222,6 +299,7 @@ class SiteController extends Controller
 
 	/*! Сброс всех правил. */
     public function actionInstall() {
+        $this->layout="service";
 
         if ( Yii::app()->user->id != 1 ) {
             throw new CHttpException(403, "Forbidden");
@@ -248,6 +326,17 @@ class SiteController extends Controller
         $auth->createOperation("readContainer", "Просмотр контейнеров");
         $auth->createOperation("updateContainer", "Создание/изменение/удаление контейнеров");
         $auth->createOperation("updateLocation", "Создание/изменение/удаление локации");
+        // $auth->createOperation("readBranch", "Просмотр контейнеров в филиале");
+        // $auth->createOperation("readAnyBranches", "Просмотр хотя бы одного филиала");
+
+        // $task = $auth->createTask("readBranch", "Просмотр контейнеров в филиале", 'return Controller::accessBranch($params["branch_id"]);');
+        // $task->addChild("readContainer");
+
+        $task = $auth->createTask("readAnyBranches", "Просмотр хотя бы одного филиала", 'return Controller::accessAnyBranches();');
+        $task->addChild("readContainer");
+
+        $task = $auth->createTask("updateAnyBranches", "Создание/изменение/удаление хотя бы одного филиала", 'return Controller::accessAnyBranches(true);');
+        $task->addChild("updateContainer");
 
         // Сушилки
         $auth->createOperation("readDryer", "Просмотр раздела сушилок");
@@ -277,10 +366,6 @@ class SiteController extends Controller
         // Корреспонденты
         $auth->createOperation("readCorr", "Просмотр корреспондентов");
         $auth->createOperation("updateCorr", "Создание/изменение/удаление корреспондентов");
-
-        // $bizRule = 'return $params["type_id"] == 2;';
-        // $task = $auth->createTask("updateFinCash", "Создание/изменение/удаление платежей в разделе финансов", $bizRule);
-        // $task->addChild("updateCash");
 
         // Отгрузки
         $auth->createOperation("readWood", "Просмотр раздела отгрузок");
@@ -319,6 +404,9 @@ class SiteController extends Controller
         $role = $auth->createRole("containerManager");
         $role->addChild("readContainer");
         $role->addChild("updateContainer");
+
+        // Управление дислокацией
+        $role = $auth->createRole("locationManager");
         $role->addChild("updateLocation");
 
         // Управляющий сушилками
@@ -414,6 +502,10 @@ class SiteController extends Controller
         // Связываем пользователей с ролями
         $users = User::model()->with("roles.role")->findAll();
         foreach ($users as $i => $user) {
+            // $auth->assign("readBranch", $user->id);
+            $auth->assign("readAnyBranches", $user->id);
+            $auth->assign("updateAnyBranches", $user->id);
+
             foreach ($user->roles as $j => $role) {
                 $auth->assign($role->role->code, $user->id);
             }

@@ -52,10 +52,19 @@ class UserController extends Controller
 				$this->actionAdminindex(true);
 				return true;
 			}
+		}else{
+			$branches = array();
+			foreach (Branch::model()->findAll() as $key => $branch) {
+				$branches[$branch->id] = (object) array(
+					"name" => $branch->name,
+					"value" => NULL
+				);
+			}
 		}
 
 		$this->renderPartial("adminCreate",array(
 			"model" => $model,
+			"branches" => $branches,
 		));
 
 	}
@@ -68,39 +77,6 @@ class UserController extends Controller
 		{
 			$model->prevPass = $model->password;
 			$model->attributes = $_POST["User"];
-
-			UserRole::model()->deleteAll("user_id=".$model->id);
-
-			if( isset($_POST["Roles"]) ){
-				foreach ($_POST["Roles"] as $key => $roleId) {
-					$role = new UserRole();
-					$role->user_id = $model->id;
-					$role->role_id = $roleId;
-					$role->save();
-				}
-			}
-
-			UserWidget::model()->deleteAll("user_id=".$model->id);
-
-			if( isset($_POST["Widgets"]) ){
-				foreach ($_POST["Widgets"] as $key => $widgetId) {
-					$widget = new UserWidget();
-					$widget->user_id = $model->id;
-					$widget->widget_id = $widgetId;
-					$widget->save();
-				}
-			}
-
-			UserBranch::model()->deleteAll("user_id=".$model->id);
-
-			if( isset($_POST["Branches"]) ){
-				foreach ($_POST["Branches"] as $key => $branchId) {
-					$branch = new UserBranch();
-					$branch->user_id = $model->id;
-					$branch->branch_id = $branchId;
-					$branch->save();
-				}
-			}
 
 			if($model->save()){
 				$this->actionAdminindex(true);
@@ -118,8 +94,16 @@ class UserController extends Controller
 			}
 
 			$branches = array();
+			foreach (Branch::model()->findAll() as $key => $branch) {
+				$branches[$branch->id] = (object) array(
+					"name" => $branch->name,
+					"value" => NULL
+				);
+			}
 			foreach ($model->branches as $key => $branch) {
-				array_push($branches, $branch->branch_id);
+				if( isset($branches[$branch->branch_id]) ){
+					$branches[$branch->branch_id]->value = ($branch->w)?2:1;
+				}
 			}
 
 			$this->renderPartial("adminUpdate",array(

@@ -73,6 +73,7 @@ class Way extends CActiveRecord
 		// @todo Please modify the following code to remove attributes that should not be searched.
 
 		$criteria=new CDbCriteria;
+		$criteria->order = "name ASC";
 
 		$criteria->compare("id",$this->id);
 		$criteria->addSearchCondition("name", $this->name);

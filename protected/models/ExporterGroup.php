@@ -55,7 +55,6 @@ class ExporterGroup extends CActiveRecord
 		return array(
 			"containers" => array(self::HAS_MANY, "Container", "exporter_group_id"),
 			"exporters" => array(self::HAS_MANY, "Exporter", "group_id"),
-			"branches" => array(self::HAS_MANY, "ExporterGroupBranch", "exporter_group_id"),
 		);
 	}
 

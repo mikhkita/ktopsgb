@@ -66,7 +66,7 @@ class ExporterController extends Controller
 		$model = new Exporter;
 
 		if(isset($_POST["Exporter"])) {
-			if( $model->updateObj($_POST["Exporter"]) ){
+			if( $model->updateObj($_POST["Exporter"], $_POST["Branches"]) ){
 				$this->actionAdminIndex(true);
 				return true;
 			}
@@ -82,13 +82,19 @@ class ExporterController extends Controller
 		$model = $this->loadModel($id);
 
 		if(isset($_POST["Exporter"])) {
-			if( $model->updateObj($_POST["Exporter"]) ){
+			if( $model->updateObj($_POST["Exporter"], $_POST["Branches"]) ){
 				$this->actionAdminIndex(true);
 				return true;
 			}
 		}else{
+			$branches = array();
+			foreach ($model->branches as $key => $branch) {
+				array_push($branches, $branch->branch_id);
+			}
+
 			$this->renderPartial("adminUpdate",array(
 				"model" => $model,
+				"branches" => $branches
 			));
 		}
 	}
@@ -102,7 +108,7 @@ class ExporterController extends Controller
 
 	public function loadModel($id)
 	{
-		$model = Exporter::model()->findByPk($id);
+		$model = Exporter::model()->with("branches")->findByPk($id);
 
 		if($model===null)
 			throw new CHttpException(404, "The requested page does not exist.");

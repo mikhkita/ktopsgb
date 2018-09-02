@@ -13,15 +13,11 @@ class ContainerController extends Controller
 	{
 		return array(
 			array("allow",
-				"actions" => array("adminIndex", "adminExport"),
+				"actions" => array("adminIndex", "adminExport", "adminViewSettings", "adminLocationHistory", "adminAddCheckbox","adminRemoveCheckbox","adminAddManyCheckboxes","adminRemoveManyCheckboxes", "adminRemoveAllCheckboxes", "adminView", "adminUpdate", "adminUpdateAll", "adminDelete", "adminCreate", "adminCargoIndex", "adminCargoCreate", "adminCargoUpdate", "adminCargoDelete"),
 				"roles" => array("readContainer"),
 			),
 			array("allow",
-				"actions" => array("adminUpdate", "adminUpdateAll", "adminDelete", "adminCreate", "adminCargoIndex", "adminCargoCreate", "adminCargoUpdate", "adminCargoDelete", "adminLocationHistory", "adminAddCheckbox","adminRemoveCheckbox","adminAddManyCheckboxes","adminRemoveManyCheckboxes", "adminRemoveAllCheckboxes", "adminViewSettings"),
-				"roles" => array("updateContainer"),
-			),
-			array("allow",
-				"actions" => array("adminLocation", "adminLocationAll"),
+				"actions" => array("adminLocation", "adminLocationDelete","adminLocationAll"),
 				"roles" => array("updateLocation"),
 			),
 			array("deny",
@@ -37,24 +33,46 @@ class ContainerController extends Controller
 			$this->pageTitle = $this->adminMenu["cur"]->name;
 		}
 
-		// Если не указан тип, то редиректить на первый
-		$branches = Branch::model()->findAll();
-		
+		$branch_ids = $this->getIds($this->user->branches, "branch_id");
+
+		// Если в пользовательских параметрах нет ID филиала, то редиректить на первый
+		$branches = Branch::model()->findAll("id IN (".implode(",", $branch_ids).")");
 		if( $branch_id === NULL ){
-			header("Location: ".$this->createUrl("/".$this->adminMenu["cur"]->code."/adminindex", array("branch_id" => $branches[0]->id)));
-			die();
+			if( !($branch_id = $this->getUserParam("Container_branch_id")) ){
+				$branch_id = $branches[0]->id;
+			}
 		}
+		// Костыль.
+		$_GET["branch_id"] = $branch_id;
 
-        $filter = new Container("filter");
+		if(!$this->checkAccess("readBranch")){
+			// Если нет доступа к филиалу, то редиректить на первый
+			$branch_id = $branches[0]->id;
+		}
+		// Сохраняем ID филиала в пользовательских параметрах
+		$this->setUserParam("Container_branch_id", $branch_id);
 
-		if (isset($_GET["Container"])){
-            $filter->attributes = $_GET["Container"];
-        }
+		$fields = array(
+			"exporters" => CHtml::listData(Exporter::model()->with("branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name"),
+			"shippers" => CHtml::listData(Shipper::model()->findAll(), "id", "name"),
+			"stations" => CHtml::listData(Station::model()->findAll("branch_id=".$_GET["branch_id"]), "id", "name"),
+			"carriers" => CHtml::listData(Carrier::model()->findAll("branch_id=".$_GET["branch_id"]), "id", "name"),
+			"ways" => CHtml::listData(Way::model()->findAll(), "id", "name"),
+			"stationDests" => CHtml::listData(StationDest::model()->findAll(), "id", "name"),
+			"destinations" => CHtml::listData(Destination::model()->findAll(), "id", "name"),
+			"owners" => CHtml::listData(Owner::model()->findAll(), "id", "name"),
+			"stampTypes" => CHtml::listData(StampType::model()->findAll(), "id", "name"),
+			"loadingPlaces" => CHtml::listData(LoadingPlace::model()->findAll(), "id", "name"),
+			"consignees" => CHtml::listData(Consignee::model()->findAll(), "id", "name"),
+			"deliveryConditions" => CHtml::listData(DeliveryCondition::model()->findAll(), "id", "name"),
+		);
+
+        $filter = $this->setSessionFilter( new Container("filter"), "Container", $fields, $branch_id);
+
+        $this->readDates($filter);
 
         $dataProvider = $filter->search(50, $branch_id);
-
 		$data = $dataProvider->getData();
-
 		$count = $filter->search(50, $branch_id, true);
 
 		$params = array(
@@ -65,19 +83,9 @@ class ContainerController extends Controller
 			"labels" => Container::attributeLabels(),
 			"branches" => $branches,
 			"edit" => false,
-			"fields" => Container::attributesFiltered( $this->getUserParam("container_view") )
+			"fields" => $this->getSortedAttributes( Container::attributesFiltered( $this->getUserParam("container_view") ) )
 		);
-
-		$params["exporterGroups"] = CHtml::listData(ExporterGroup::model()->with("branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name");
-		$params["exporters"] = CHtml::listData(Exporter::model()->with("group.branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name");
-		$params["stations"] = CHtml::listData(Station::model()->findAll("branch_id=".$_GET["branch_id"]), "id", "name");
-		$params["ways"] = CHtml::listData(Way::model()->findAll(), "id", "name");
-		$params["destinations"] = CHtml::listData(Destination::model()->findAll(), "id", "name");
-		$params["owners"] = CHtml::listData(Owner::model()->findAll(), "id", "name");
-		$params["stampTypes"] = CHtml::listData(StampType::model()->findAll(), "id", "name");
-		$params["loadingPlaces"] = CHtml::listData(LoadingPlace::model()->findAll(), "id", "name");
-		$params["carriers"] = CHtml::listData(Carrier::model()->findAll(), "id", "name");
-		$params["consignees"] = CHtml::listData(Consignee::model()->findAll(), "id", "name");
+		$params = array_merge($params, $fields);
 
 		if( !$partial ){
 			$this->render("adminIndex", $params);
@@ -86,18 +94,27 @@ class ContainerController extends Controller
 		}
 	}
 
-	public function actionAdminCreate($branch_id)
+	public function actionAdminCreate($branch_id, $many = false)
 	{
+		$this->checkAccessByBranchID("updateBranch", $branch_id);
+
 		$model = new Container;
 
 		if(isset($_POST["Container"])) {
-			if( $model->updateObj($_POST["Container"]) ){
-				$this->actionAdminIndex(true, $branch_id);
-				return true;
+			if( isset($_POST["count"]) ){
+				for ($i=0; $i < intval($_POST["count"]); $i++) { 
+					$model = new Container;
+					$model->updateObj($_POST["Container"]);
+				}
+			}else{
+				$model->updateObj($_POST["Container"]);
 			}
+			$this->actionAdminIndex(true, $branch_id);
+			return true;
 		} else {
 			$this->renderPartial("adminCreate",array(
-				"model" => $model
+				"model" => $model,
+				"many" => $many
 			));
 		}
 	}
@@ -105,6 +122,7 @@ class ContainerController extends Controller
 	public function actionAdminUpdate($id, $branch_id)
 	{
 		$model = $this->loadModel($id);
+		$this->checkAccessByContainer("updateBranch", $model);
 
 		if(isset($_POST["Container"])) {
 			if( $model->updateObj($_POST["Container"]) ){
@@ -120,9 +138,37 @@ class ContainerController extends Controller
 
 	public function actionAdminDelete($id, $branch_id)
 	{
-		$this->loadModel($id)->delete();
+		$model = $this->loadModel($id);
+		$this->checkAccessByContainer("updateBranch", $model);
+
+		$model->delete();
 
 		$this->actionAdminindex(true, $branch_id);
+	}
+
+	public function actionAdminView($id, $partial = false)
+	{
+		$model = Container::model()->with(array("notes"))->findByPk($id);
+
+		if( !$partial ){
+			$this->layout = "admin";
+			$this->pageTitle = "Примечания контейнера №".$model->number;
+		}
+
+		$backLink = $this->getBackLink("containerView", Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminindex'), $partial);
+
+		$params = array(
+			"model" => $model,
+			"labels" => Container::attributeLabels(),
+			"noteLabels" => Note::attributeLabels(),
+			"backLink" => $backLink
+		);
+
+		if( $partial ){
+			$this->renderPartial("adminView", $params);
+		}else{
+			$this->render("adminView", $params);
+		}
 	}
 
 	public function actionAdminUpdateAll($partial = false, $branch_id)
@@ -136,6 +182,8 @@ class ContainerController extends Controller
 		if( isset($_POST["Container"]) ){
 			foreach ($_POST["Container"] as $key => $container) {
 				$model = Container::model()->findByPk($key);
+				$this->checkAccessByContainer("updateBranch", $model);
+
 				foreach ($container as $i => $value) {
 					$model[$i] = $value;
 				}
@@ -166,16 +214,18 @@ class ContainerController extends Controller
 				"fields" => Container::attributesFiltered( $this->getUserParam("container_view") )
 			);
 
-			$params["exporterGroups"] = CHtml::listData(ExporterGroup::model()->with("branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name");
-			$params["exporters"] = CHtml::listData(Exporter::model()->with("group.branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name");
+			$params["exporters"] = CHtml::listData(Exporter::model()->with("branches")->findAll("branches.branch_id=".$_GET["branch_id"]), "id", "name");
+			$params["shippers"] = CHtml::listData(Shipper::model()->findAll(), "id", "name");
 			$params["stations"] = CHtml::listData(Station::model()->findAll("branch_id=".$_GET["branch_id"]), "id", "name");
+			$params["carriers"] = CHtml::listData(Carrier::model()->findAll("branch_id=".$_GET["branch_id"]), "id", "name");
 			$params["ways"] = CHtml::listData(Way::model()->findAll(), "id", "name");
+			$params["stationDests"] = CHtml::listData(StationDest::model()->findAll(), "id", "name");
 			$params["destinations"] = CHtml::listData(Destination::model()->findAll(), "id", "name");
 			$params["owners"] = CHtml::listData(Owner::model()->findAll(), "id", "name");
 			$params["stampTypes"] = CHtml::listData(StampType::model()->findAll(), "id", "name");
 			$params["loadingPlaces"] = CHtml::listData(LoadingPlace::model()->findAll(), "id", "name");
-			$params["carriers"] = CHtml::listData(Carrier::model()->findAll(), "id", "name");
 			$params["consignees"] = CHtml::listData(Consignee::model()->findAll(), "id", "name");
+			$params["deliveryConditions"] = CHtml::listData(DeliveryCondition::model()->findAll(), "id", "name");
 
 			$params["edit"] = true;
 
@@ -206,14 +256,19 @@ class ContainerController extends Controller
 		$this->exportExcel($params);
 	}
 
-	public function actionAdminLocation($id, $branch_id)
+	public function actionAdminLocation($id, $branch_id = NULL)
 	{
 		$container = $this->loadModel($id);
 		$model = new Location;
+		$this->checkAccessByContainer("readBranch", $container);
 
 		if(isset($_POST["Location"])) {
 			if( $model->updateObj($_POST["Location"]) ){
-				$this->actionAdminIndex(true, $branch_id);
+				if( $branch_id == NULL ){
+					$this->actionAdminLocationHistory($id, true);
+				}else{
+					$this->actionAdminIndex(true, $branch_id);
+				}
 				return true;
 			}
 		}else{
@@ -234,6 +289,8 @@ class ContainerController extends Controller
 
 		if(isset($_POST["Location"])) {
 			foreach ($containers as $key => $container) {
+				$this->checkAccessByContainer("readBranch", $container);
+
 				$model = new Location;
 
 				$model->updateObj(array(
@@ -246,12 +303,28 @@ class ContainerController extends Controller
 		}else{
 			$model = new Location;
 
-			$this->renderPartial("adminLocation",array(
+			$this->renderPartial("adminLocationAll",array(
 				"model" => $model,
 				"container" => $container,
 				"containersText" => implode(", ", $this->getIds($containers, "number"))
 			));
 		}
+	}
+
+	public function actionAdminLocationDelete($id, $branch_id)
+	{
+		$location = Location::model()->findByPk($id);
+		$container_id = $location->container_id;
+		if($location===null)
+			throw new CHttpException(404, "The requested page does not exist.");
+
+		$this->checkAccessByContainer("readBranch", $container_id);
+
+		$location->delete();
+
+		$_GET["branch_id"] = $branch_id;
+		$this->actionAdminLocationHistory($container_id, true);
+		return true;
 	}
 
 	public function actionAdminLocationHistory($id, $partial = false)
@@ -289,13 +362,18 @@ class ContainerController extends Controller
 		}
 
 		$container = $this->loadModel($container_id);
+		$this->checkAccessByContainer("readBranch", $container);
+
 		$model = Cargo::model()->findAll("container_id='$container_id'");
+
+		$backLink = $this->getBackLink("cargo", Yii::app()->createUrl('/'.$this->adminMenu["cur"]->code.'/adminindex'), $partial);
 
 		$params = array(
 			"data" => $model,
 			"labels" => Cargo::attributeLabels(),
 			"container" => $container,
-			"total" => Cargo::getTotal($model)
+			"total" => Cargo::getTotal($model),
+			"backLink" => $backLink
 		);
 
 		if( !$partial ){
@@ -308,6 +386,7 @@ class ContainerController extends Controller
 	public function actionAdminCargoCreate($container_id)
 	{
 		$model = new Cargo;
+		$this->checkAccessByContainer("readBranch", $container_id);
 
 		if(isset($_POST["Cargo"])) {
 			if( $model->updateObj($_POST["Cargo"]) ){
@@ -324,6 +403,7 @@ class ContainerController extends Controller
 	public function actionAdminCargoUpdate($id, $container_id)
 	{
 		$model = Cargo::model()->findByPk($id);
+		$this->checkAccessByContainer("readBranch", $model->container_id);
 
 		if(isset($_POST["Cargo"])) {
 			if( $model->updateObj($_POST["Cargo"]) ){
@@ -339,18 +419,20 @@ class ContainerController extends Controller
 
 	public function actionAdminCargoDelete($id, $container_id)
 	{
-		Cargo::model()->findByPk($id)->delete();
+		$model = Cargo::model()->findByPk($id);
+		$this->checkAccessByContainer("readBranch", $model->container_id);
+		$model->delete();
 
 		$this->actionAdminCargoIndex(true, $container_id);
 	}
 
-	public function actionAdminAddCheckbox($branch_id, $id = NULL){
-		$model = Container::model()->findByPk($id);
+	public function actionAdminAddCheckbox($branch_id, $container_id = NULL){
+		$model = Container::model()->findByPk($container_id);
 		$this->displayCodes($this->addCheckbox("container".$branch_id, $model->id, $model->number), "container".$branch_id);
 	}
 
-	public function actionAdminRemoveCheckbox($branch_id, $id = NULL){
-		$model = Container::model()->findByPk($id);
+	public function actionAdminRemoveCheckbox($branch_id, $container_id = NULL){
+		$model = Container::model()->findByPk($container_id);
 		$this->displayCodes($this->removeCheckbox("container".$branch_id, $model->id, $model->number), "container".$branch_id);
 	}
 
@@ -399,10 +481,8 @@ class ContainerController extends Controller
 				$attributes[$code] = $label["NAME"];
 			}
 
-			$attributes = $this->splitByCols(2, $attributes);
-
 			$this->renderPartial("_viewSettings", array(
-				"attributes" => $attributes,
+				"attributes" => $this->getSortedAttributes($attributes),
 				"selected" => $this->getUserParam("container_view")
 			));
 		}

@@ -49,6 +49,94 @@ return array (
     'bizRule' => NULL,
     'data' => NULL,
   ),
+  'readAnyBranches' => 
+  array (
+    'type' => 1,
+    'description' => 'Просмотр хотя бы одного филиала',
+    'bizRule' => 'return Controller::accessAnyBranches();',
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'readContainer',
+    ),
+    'assignments' => 
+    array (
+      1 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      4 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      7 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      8 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      10 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
+  'updateAnyBranches' => 
+  array (
+    'type' => 1,
+    'description' => 'Создание/изменение/удаление хотя бы одного филиала',
+    'bizRule' => 'return Controller::accessAnyBranches(true);',
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'updateContainer',
+    ),
+    'assignments' => 
+    array (
+      1 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      4 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      5 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      7 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      8 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+      10 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
   'readDryer' => 
   array (
     'type' => 0,
@@ -257,7 +345,25 @@ return array (
     array (
       0 => 'readContainer',
       1 => 'updateContainer',
-      2 => 'updateLocation',
+    ),
+    'assignments' => 
+    array (
+      8 => 
+      array (
+        'bizRule' => NULL,
+        'data' => NULL,
+      ),
+    ),
+  ),
+  'locationManager' => 
+  array (
+    'type' => 2,
+    'description' => '',
+    'bizRule' => NULL,
+    'data' => NULL,
+    'children' => 
+    array (
+      0 => 'updateLocation',
     ),
   ),
   'dryerManager' => 

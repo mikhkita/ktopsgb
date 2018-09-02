@@ -39,10 +39,10 @@ class Location extends CActiveRecord
 		return array(
 			array("date, name, container_id", "required"),
 			array("name", "length", "max" => 128),
-			array("container_id", "length", "max" => 10),
+			array("container_id, user_id", "length", "max" => 10),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array("id, date, name, container_id", "safe", "on" => "search"),
+			array("id, date, name, container_id, user_id", "safe", "on" => "search"),
 		);
 	}
 
@@ -55,6 +55,7 @@ class Location extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
 			"container" => array(self::BELONGS_TO, "Container", "container_id"),
+			"user" => array(self::BELONGS_TO, "User", "user_id"),
 		);
 	}
 
@@ -68,6 +69,7 @@ class Location extends CActiveRecord
 			"date" => "Дата и время отметки",
 			"name" => "Место дислокации",
 			"container_id" => "Контейнер",
+			"user_id" => "Пользователь"
 		);
 	}
 
@@ -94,6 +96,7 @@ class Location extends CActiveRecord
 		$criteria->addSearchCondition("date", $this->date);
 		$criteria->addSearchCondition("name", $this->name);
 		$criteria->compare("container_id", $this->container_id);
+		$criteria->compare("user_id", $this->user_id);
 
 		if( $count ){
 			return Location::model()->count($criteria);

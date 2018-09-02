@@ -20,6 +20,7 @@ class User extends CActiveRecord
 	const STATE_DISABLED = 0;
 
 	public $prevPass = null;
+	public $fio = "";
 
 	/**
 	 * @return string the associated database table name
@@ -59,7 +60,8 @@ class User extends CActiveRecord
 			"roles" => array(self::HAS_MANY, "UserRole", "user_id"),
 			"widgets" => array(self::HAS_MANY, "UserWidget", "user_id"),
 			"branches" => array(self::HAS_MANY, "UserBranch", "user_id"),
-			'settings' => array(self::HAS_MANY, 'UserSettings', 'user_id'),
+			"settings" => array(self::HAS_MANY, "UserSettings", "user_id"),
+			"locations" => array(self::HAS_MANY, "Location", "user_id"),
 		);
 	}
 
@@ -77,7 +79,7 @@ class User extends CActiveRecord
 			"email" => "E-mail",
 			"roles" => "Роли",
 			"widgets" => "Виджеты",
-			"branches" => "Филиалы",
+			"branches" => "Доступ к филиалам",
 			"active" => "Активность",
 			"token" => "Токен",
 		);
@@ -104,12 +106,55 @@ class User extends CActiveRecord
 		$auth = Yii::app()->authManager;
 
 		//предварительно удаляем старые связи
+		$auth->revoke("readAnyBranches", $this->id);
+		$auth->revoke("updateAnyBranches", $this->id);
 		foreach ($this->roles as $key => $role) {
 			$auth->revoke($role->role->code, $this->id);	
 		}
 		foreach ($this->widgets as $key => $widget) {
 			$auth->revoke($widget->widget->code, $this->id);	
 		}
+
+		UserRole::model()->deleteAll("user_id=".$this->id);
+
+		if( isset($_POST["Roles"]) ){
+			foreach ($_POST["Roles"] as $key => $roleId) {
+				$role = new UserRole();
+				$role->user_id = $this->id;
+				$role->role_id = $roleId;
+				$role->save();
+			}
+		}
+
+		UserWidget::model()->deleteAll("user_id=".$this->id);
+
+		if( isset($_POST["Widgets"]) ){
+			foreach ($_POST["Widgets"] as $key => $widgetId) {
+				$widget = new UserWidget();
+				$widget->user_id = $this->id;
+				$widget->widget_id = $widgetId;
+				$widget->save();
+			}
+		}
+
+		UserBranch::model()->deleteAll("user_id=".$this->id);
+
+		if( isset($_POST["Branches"]) ){
+			foreach ($_POST["Branches"] as $branch_id => $type) {
+				if( $type == "" ) continue;
+				
+				$branch = new UserBranch();
+				$branch->user_id = $this->id;
+				$branch->branch_id = $branch_id;
+				if( intval($type) == 2 ){
+					$branch->w = 1;
+				}
+				$branch->save();
+			}
+		}
+
+		$auth->assign("readAnyBranches", $this->id);
+        $auth->assign("updateAnyBranches", $this->id);
 
 		$model = UserRole::model()->with("role")->findAll("user_id=".$this->id);
 		foreach ($model as $key => $role) {
@@ -122,6 +167,13 @@ class User extends CActiveRecord
 		}
 		$auth->save();
 		return true;
+	}
+
+	public function afterFind()
+	{
+		parent::afterFind();
+
+		$this->fio = $this->surname." ".$this->name;
 	}
 
 	/**
@@ -160,6 +212,16 @@ class User extends CActiveRecord
 
 		foreach ($this->roles as $i => $role) {
 			$out[$role->role->id] = $role->role->name;
+		}
+
+		return $out;
+	}
+
+	public function getBranches(){
+		$out = array();
+
+		foreach ($this->branches as $i => $branch) {
+			$out[$branch->branch->id] = $branch->branch->name.(($branch->w)?" (w)":" (r)");
 		}
 
 		return $out;

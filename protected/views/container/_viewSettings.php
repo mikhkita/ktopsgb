@@ -7,17 +7,13 @@
         'id'=>'faculties-form',
         'enableAjaxValidation'=>false,
     )); ?>
-        <div class="b-group-vars">
-            <? foreach ($attributes as $key => $attrs): ?>
-                <div class="b-group-col">
-                    <?=CHTML::checkBoxList("view_fields", $selected, $attrs, array("separator"=>"","baseID"=>"arr".$key,"template"=>"<div class='checkbox-row'>{input}{label}</div>")); ?>
-                </div>
-            <? endforeach; ?>
-        </div>
+        <ul class="b-group-vars b-sortable-cont" id="b-sortable-cont">
+            <?=CHTML::checkBoxList("view_fields", $selected, $attributes, array("separator"=>"","baseID"=>"arr".$key,"template"=>"<li class='checkbox-row b-sortable-row'>{input}{label}</li>")); ?>
+        </ul>
 
         <div class="b-checkbox-nav">
-            <a href="#" class="select-all" data-items=".b-group-col input[type='checkbox']">Выделить все</a>
-            <a href="#" class="select-none" data-items=".b-group-col input[type='checkbox']">Сбросить выделение</a>
+            <a href="#" class="select-all" data-items=".b-group-vars input[type='checkbox']:not([value='number'])">Выделить все</a>
+            <a href="#" class="select-none" data-items=".b-group-vars input[type='checkbox']:not([value='number'])">Сбросить выделение</a>
         </div>
 
         <div class="row buttons">

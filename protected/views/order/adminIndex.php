@@ -9,12 +9,12 @@
 
 		<span class="left"><b>Показывать:</b></span>
 		<ul class="b-section-menu clearfix left">
-			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex', array("company_id" => $_GET["company_id"]))?>"<? if($this->isCurrentMonth($filter)): ?> class="active"<? endif; ?>>Текущий месяц</a></li>
+			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex', array("current_month" => true, "company_id" => $_GET["company_id"]))?>"<? if($this->isCurrentMonth($filter)): ?> class="active"<? endif; ?>>Текущий месяц</a></li>
 			<li><a href="<?=$this->createUrl('/'.$this->adminMenu['cur']->code.'/adminindex', array("previous" => true, "company_id" => $_GET["company_id"]))?>"<? if($this->isPreviousMonth($filter)): ?> class="active"<? endif; ?>>Предыдущий месяц</a></li>
 		</ul>
 
 		<ul style="margin-left: 44px;" class="b-section-menu clearfix left">
-			<li><a href="<?=$this->createUrl("/uploader/form", array("afterLoad" => "submitFile", "extensions" => "txt", "maxFiles" => "1", "selector" => "#file"))?>" class="b-get-file">Импорт</a></li>
+			<li><a href="<?=Yii::app()->createUrl("/sorting/adminimport", array("company_id" => $_GET['company_id']))?>" class="ajax-form ajax-update">Импорт</a></li>
 		</ul>
 		<? /* ?>
 		<ul style="margin-left: 44px;" class="b-section-menu clearfix left">
@@ -90,7 +90,3 @@
 		</div>
 	</div>
 </div>
-
-<form action="<?=Yii::app()->createUrl("/sorting/adminimport", array("company_id" => $_GET['company_id']))?>" method="POST" id="fileForm">
-	<input type="hidden" name="file" id="file">
-</form>

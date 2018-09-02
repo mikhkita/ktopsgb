@@ -41,9 +41,10 @@ class Branch extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			"exporterGroups" => array(self::HAS_MANY, "ExporterGroupBranch", "branch_id"),
+			"exporters" => array(self::HAS_MANY, "ExporterBranch", "branch_id"),
 			"users" => array(self::HAS_MANY, "UserBranch", "branch_id"),
-			"station" => array(self::HAS_MANY, "Station", "branch_id"),
+			"stations" => array(self::HAS_MANY, "Station", "branch_id"),
+			"carriers" => array(self::HAS_MANY, "Carrier", "branch_id"),
 		);
 	}
 

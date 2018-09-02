@@ -222,6 +222,7 @@ html[dir="rtl"] .select2-container .select2-choice > .select2-chosen {
     border-radius: 0 4px 4px 0;
     background-clip: padding-box;
     background: #FFF5D1;
+    padding: 0px;
 }
 
 html[dir="rtl"] .select2-container .select2-choice .select2-arrow {
